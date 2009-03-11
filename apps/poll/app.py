@@ -37,14 +37,13 @@ class App(rapidsms.app.App):
                 try:
                     func, captures = self.kw.match(self, message.text)
                     func(self, message, *captures)
-                    # nothing was found, use default handler
                 except Exception, e:
-                    print e             
+                    self.error(e)
+                    self.incoming_sms(message)
             else:
-                print 'no KW'
-				incoming_sms(message)
+                self.debug('App does not instantiate Keyworder as kw')
         except Exception, e:
-            print e 
+            self.error(e) 
 
 
     def outgoing(self, message):
@@ -75,7 +74,7 @@ class App(rapidsms.app.App):
     @kw.blank()
     @kw("(whatever)")
     def subscribe(self, message, blah=None):
-        r, created = Respondant.subscribe(message.caller)
+        r, created = Respondant.subscribe(message.caller, message.backend)
         
         # acknowledge with an appropriate message
         if created: message.respond(STR["subscribe"])
@@ -89,7 +88,7 @@ class App(rapidsms.app.App):
     @kw.blank()
     @kw("(whatever)")
     def unsubscribe(self, message, blah=None):
-        r, created = Respondant.unsubscribe(message.caller)
+        r, created = Respondant.unsubscribe(message.caller, message.backend)
         message.respond(STR["unsubscribe"])
     
     
@@ -97,7 +96,7 @@ class App(rapidsms.app.App):
 
     def incoming_sms(self, message):
         # ensure that the caller is subscribed
-        r, created = Respondant.subscribe(message.caller)
+        r, created = Respondant.subscribe(message.caller, message.backend)
         
         # if no question is currently running, then
         # we can effectively ignore the incoming sms,
