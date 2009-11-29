@@ -1,6 +1,7 @@
 from rapidsms.tests.scripted import TestScript
 from form.models import *
 from reporters.models import *
+from locations.models import *
 import reporters.app as reporter_app
 import supply.app as supply_app
 import form.app as form_app

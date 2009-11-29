@@ -1,6 +1,7 @@
 # vim: ai sts=4 ts=4 et sw=4
 from django.db import models
-from reporters.models import Location, Reporter, PersistantConnection
+from locations.models import Location
+from reporters.models import Reporter, PersistantConnection
 import time as taim
 
 class NetDistribution(models.Model):

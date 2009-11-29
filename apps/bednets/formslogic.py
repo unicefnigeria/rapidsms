@@ -4,6 +4,7 @@
 from models import *
 from rapidsms.message import StatusCodes
 from reporters.models import *
+from locations.models import *
 from form.formslogic import FormsLogic
 import re
 
