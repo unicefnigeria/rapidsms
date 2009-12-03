@@ -18,14 +18,17 @@ class App (rapidsms.app.App):
         msgtxt = msgtxt.strip()
 
         # replace separation marks with a space
-        separators = [',', '/', ';', '*', '+', '-']
+        # thought it will be better to replace all separators and junk characters with a space
+        # and then truncate extra spaces instead of having separate routines for space replacement
+        # and then character truncation.
+        separators = [',', '/', ';', '*', '+', '-', ':', '\'', '\"', '`', '(', ')']
         for mark in separators:
            msgtxt = msgtxt.replace(mark, ' ') 
 
         # remove other marks (we'll deal with . later) 
-        junk = ['\'', '\"', '`', '(', ')']
-        for mark in junk:
-           msgtxt = msgtxt.replace(mark, '') 
+        #junk = ['\'', '\"', '`', '(', ')']
+        #for mark in junk:
+        #   msgtxt = msgtxt.replace(mark, '') 
 
         # split the text into chunks
         blobs = msgtxt.split(" ")
