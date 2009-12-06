@@ -8,6 +8,7 @@ register = template.Library()
 
 from datetime import datetime, timedelta
 from reporters.models import *
+from locations.models import *
 from ipd.models import *
 
 @register.inclusion_tag("ipd/partials/stats.html")

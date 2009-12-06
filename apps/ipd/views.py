@@ -27,7 +27,7 @@ sys.setdefaultencoding('utf-8')
 #Views for handling summary of Reports Displayed as Location Tree
 
 def dashboard(req):
-	return render_to_response(req, "dashboard.html")
+	return render_to_response(req, "ipd/dashboard.html")
 
 def index(req, locid=None):
     if not locid:
