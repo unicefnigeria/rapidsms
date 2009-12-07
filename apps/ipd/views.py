@@ -25,10 +25,11 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 #Views for handling summary of Reports Displayed as Location Tree
-
+@permission_required('ipd.can_view')
 def dashboard(req):
 	return render_to_response(req, "ipd/ipd_dashboard.html")
 
+@permission_required('ipd.can_view')
 def index(req, locid=None):
     if not locid:
         locid = 1
@@ -39,6 +40,7 @@ def index(req, locid=None):
         pass
     return render_to_response(req,"ipd/index.html", {'location':location})
 
+@permission_required('ipd.can_view')
 def compliance_summary(req, locid=1):
     bar_data=[]
     expected_data=[]

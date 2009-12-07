@@ -31,6 +31,12 @@ class Report(models.Model):
     immunized = models.PositiveIntegerField(blank=True, null=True, help_text="Total Persons Immunized")
     commodity = models.CharField(blank=True, null=True, max_length=10, choices=IM_COMMODITIES, help_text="This is the commodity of the immunization being reported")
 
+    class Meta:
+        # the permission required for this tab to display in the UI
+        permissions = (
+            ("can_view", "Can view"),
+        )
+
     def __unicode__(self):
         return "%s (%s) => %s, %s" % (self.location, self.reporter, self.commodity, self.immunized)
 
