@@ -27,6 +27,10 @@ ITEMS_PER_PAGE = 20
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+@permission_required('bednets.can_view')
+def dashboard(req):
+    return render_to_response(req, "bednets/bednets_dashboard.html")
+
 #Views for handling summary of Reports Displayed as Location Tree
 @permission_required('bednets.can_view')
 def index(req, locid=None):

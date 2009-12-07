@@ -123,7 +123,7 @@ def pilot_summary():
     # called to fetch and assemble the
     # data structure for each pilot ward
     def __ward_data(ward):
-        locations = ward.get_descendants(True)
+        locations = ward.descendants(True)
         nc_reports = NonCompliance.objects.filter(location__in=locations)
         immunization_reports = Report.objects.filter(location__in=locations)
 

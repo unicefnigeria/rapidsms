@@ -7,7 +7,7 @@ import bednets.views as views
 
 urlpatterns = patterns('',
     url(r'^locgen/?$', views.generate),
-    url(r'^bednets/?$', views.index),
+    url(r'^bednets/?$', views.dashboard),
     url(r'^bednets/summary/(?P<locid>\d*)/?$', views.index),
     url(r'^bednets/json/?$', views.location_tree),
     url(r'^bednets/logistics/summary/(?P<locid>\d*)/?$', views.logistics_summary),
