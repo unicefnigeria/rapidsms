@@ -12,6 +12,9 @@ from locations.models import *
 from supply.models import *
 from bednets import constants
 from bednets.models import *
+from django.db.models import Q
+
+current_campaign_location = Location.objects.get(name="KEBBI", type=LocationType.objects.get(name="State"))
 
 @register.inclusion_tag("bednets/partials/recent.html")
 def recent_reporters(number=4):
@@ -29,32 +32,32 @@ def bednets_stats():
 #        },
         {
             "caption": "Reporters",
-            "value":   Reporter.objects.count()
+            "value":   Reporter.objects.filter(location__in=current_campaign_location.descendants()).count()
         },
         {
             "caption": "Active Locations",
-            "value":   PartialTransaction.objects.values("destination").distinct().count() +
-                       CardDistribution.objects.values("location").distinct().count()
+            "value":   PartialTransaction.objects.filter(destination__in=current_campaign_location.descendants()).values("destination").distinct().count() +
+                       CardDistribution.objects.filter(location__in=current_campaign_location.descendants()).values("location").distinct().count()
         },
         {
             "caption": "Stock Transfers",
-            "value":   PartialTransaction.objects.count()
+            "value":   PartialTransaction.objects.filter(Q(destination__in=current_campaign_location.descendants())|Q(origin__in=current_campaign_location.descendants())).count()
         },
         {
             "caption": "Net Card Reports",
-            "value":   CardDistribution.objects.count()
+            "value":   CardDistribution.objects.filter(location__in=current_campaign_location.descendants()).count()
         },
         {
             "caption": "Net Cards Distributed",
-            "value":   sum(CardDistribution.objects.values_list("distributed", flat=True))
+            "value":   sum(CardDistribution.objects.filter(location__in=current_campaign_location.descendants()).values_list("distributed", flat=True))
         },
         {
             "caption": "Net Reports",
-            "value":   NetDistribution.objects.count()
+            "value":   NetDistribution.objects.filter(location__in=current_campaign_location.descendants()).count()
         },
         {
             "caption": "Nets Distributed",
-            "value":   sum(NetDistribution.objects.values_list("distributed", flat=True))
+            "value":   sum(NetDistribution.objects.filter(location__in=current_campaign_location.descendants()).values_list("distributed", flat=True))
         },
 #        {
 #            "caption": "Coupon Recipients",
@@ -65,8 +68,8 @@ def bednets_stats():
 
 @register.inclusion_tag("bednets/partials/progress.html")
 def daily_progress():
-    start = datetime(2009, 05, 04)
-    end = datetime(2009, 05, 18)
+    start = datetime(2009, 12, 05)
+    end = datetime(2009, 12, 10)
     days = []
     
     
@@ -118,10 +121,10 @@ def daily_progress():
             })
         days.append(data)
     
-    total_netcards = sum(CardDistribution.objects.all().values_list("distributed", flat=True))
+    total_netcards = sum(CardDistribution.objects.filter(location__in=current_campaign_location.descendants()).values_list("distributed", flat=True))
     netcards_stats = int(float(total_netcards) / coupon_target * 100) if (total_netcards > 0) else 0
 
-    total_beneficiaries = sum(CardDistribution.objects.all().values_list("people", flat=True))
+    total_beneficiaries = sum(CardDistribution.objects.filter(location__in=current_campaign_location.descendants()).values_list("people", flat=True))
     beneficiaries_stats = int(float(total_beneficiaries) / recipient_target * 100) if (total_beneficiaries > 0) else 0
 
     return { "days": days, 
@@ -135,8 +138,7 @@ def daily_progress():
 def pilot_summary():
     
     # fetch all of the LGAs that we want to display
-    lga_names = ["DAWAKIN KUDU", "GARUN MALLAM", "KURA", "KANO MUNICIPAL"]
-    lgas = LocationType.objects.get(name="LGA").locations.filter(name__in=lga_names)
+    lgas = current_campaign_location.children.all()
     
     # called to fetch and assemble the
     # data structure for each pilot ward
@@ -163,15 +165,49 @@ def pilot_summary():
     def __lga_data(lga):
         projections = {
             "netcards" : {
-                        "DAWAKIN KUDU"   : 99379.0,
-                        "GARUN MALLAM"   : 51365.0,
-                        "KANO MUNICIPAL" : 161168.0,
-                        "KURA"           : 63758.0 },
+                "ALIERO"          : 12090.0,
+                "AREWA DANDI"     : 11300.0,
+                "ARGUNGU"         : 9000.0,
+                "AUGIE"           : 8000.0,
+                "BAGUDO"          : 4000.0,
+                "BIRNIN KEBBI"    : 8000.0,
+                "BUNZA"           : 7000.0,
+                "DANDI"           : 9000.0,
+                "GWANDU"          : 10000.0,
+                "JEGA"            : 15000.0,
+                "KALGO"           : 17000.0,
+                "KOKO/BESSE"      : 12000.0,
+                "MAIYAMA"         : 12000.0,
+                "NGASKI"          : 11000.0,
+                "PAKAL"           : 9000.0,
+                "SAKABA"          : 8000.0,
+                "SHANGA"          : 12000.0,
+                "SURU"            : 11000.0,
+                "WASAGU/DANKO"    : 12000.0,
+                "YAURI"           : 16000.0,
+                "ZURU"            : 18000.0},
             "beneficiaries" : {
-                        "DAWAKIN KUDU"   : 248447.0,
-                        "GARUN MALLAM"   : 128412.0,
-                        "KANO MUNICIPAL" : 402919.0,
-                        "KURA"           : 159394.0 },
+                "ALIERO"          : 12090.0,
+                "AREWA DANDI"     : 11300.0,
+                "ARGUNGU"         : 9000.0,
+                "AUGIE"           : 8000.0,
+                "BAGUDO"          : 4000.0,
+                "BIRNIN KEBBI"    : 8000.0,
+                "BUNZA"           : 7000.0,
+                "DANDI"           : 9000.0,
+                "GWANDU"          : 10000.0,
+                "JEGA"            : 15000.0,
+                "KALGO"           : 17000.0,
+                "KOKO/BESSE"      : 12000.0,
+                "MAIYAMA"         : 12000.0,
+                "NGASKI"          : 11000.0,
+                "PAKAL"           : 9000.0,
+                "SAKABA"          : 8000.0,
+                "SHANGA"          : 12000.0,
+                "SURU"            : 11000.0,
+                "WASAGU/DANKO"    : 12000.0,
+                "YAURI"           : 16000.0,
+                "ZURU"            : 18000.0},
         }
 
         wards = lga.children.all()
@@ -225,7 +261,7 @@ def logistics_summary():
             "logistician": lga.one_contact('SM', True)}
     
     # process and return data for ALL LGAs for this report
-    return { "lgas": map(__lga_data, LocationType.objects.get(name="LGA").locations.filter(code__in=constants.KANO_PILOT_LGAS).all()) }
+    return { "lgas": map(__lga_data, current_campaign_location.children.all()) }
 
 @register.inclusion_tag("bednets/partials/distribution_summary_charts.html")
 def distribution_summary_charts():
@@ -237,7 +273,7 @@ def distribution_summary_charts():
     beneficiaries_total = []
     lga_names = []
 
-    pilot_lgas = summary['pilot_lgas']
+    pilot_lgas = summary['pilot_lgas'][0:4]
     for lga in pilot_lgas:
         netcards_projected.append("[%d, %d]" % (pilot_lgas.index(lga) * 3 + 1, lga['netcards_projected']))
         netcards_total.append("[%d, %d]" % (pilot_lgas.index(lga) * 3 + 2, lga['netcards_total']))

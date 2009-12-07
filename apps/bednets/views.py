@@ -26,6 +26,7 @@ ITEMS_PER_PAGE = 20
 # do we really need to reload it?  TIM to check
 reload(sys)
 sys.setdefaultencoding('utf-8')
+current_campaign_location = 46214
 
 @permission_required('bednets.can_view')
 def dashboard(req):
@@ -35,7 +36,7 @@ def dashboard(req):
 @permission_required('bednets.can_view')
 def index(req, locid=None):
     if not locid:
-        locid = 1
+        locid = current_campaign_location
     try:
         location = Location.objects.get(id=locid)
         # prepopulate the card and net data dictionaries
@@ -49,7 +50,7 @@ def index(req, locid=None):
 
 def location_tree(req):
     location = None
-    locid = 1
+    locid = current_campaign_location
 
     try:
         locid = req.GET['root']
@@ -60,7 +61,7 @@ def location_tree(req):
     
     if locid:
         if locid == "source":
-            locid = 1
+            locid = current_campaign_location
         try:
             location = Location.objects.get(id=locid)
             if location.type.name == "State":
@@ -100,7 +101,7 @@ def logistics_summary(req, locid):
     # one in the database.  If there are no locations in the
     # database we are S.O.L.
     if not locid:
-        locid = 1
+        locid = current_campaign_location
     try: 
         location = Location.objects.get(pk=locid)
     except Location.DoesNotExist:
@@ -246,7 +247,7 @@ def bednets_summary(req, locid=1):
                      }
                  )
 
-def coupons_summary(req, locid=1):
+def coupons_summary(req, locid=current_campaign_location):
     #Declarations
     try: 
         location = Location.objects.get(pk=locid)
@@ -319,7 +320,7 @@ def coupons_summary(req, locid=1):
 
 
 # Periodical Reporting  by day, week, month for coupons
-def coupons_daily(req, locid=1):
+def coupons_daily(req, locid=current_campaign_location):
     #Declarations
     child = Location.objects.get(pk=locid).children.all()[0]
     try: 
@@ -385,7 +386,7 @@ def coupons_monthly(req, locid):
 # Periodical Reporting  by day, week, month for bednets
 def bednets_daily(req, locid):
     if not locid:
-        locid = 1
+        locid = current_campaign_location
     try: 
         location = Location.objects.get(pk=locid)
         #_set_stock(location)
