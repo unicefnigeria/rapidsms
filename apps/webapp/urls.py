@@ -6,6 +6,7 @@ import webapp.views as views
 
 urlpatterns = patterns('',
     url(r'^$',     views.dashboard),
+	url(r'^accounts/profile/$',     views.dashboard),
     url(r'^ping$', views.check_availability),
     (r'^accounts/login/$', "webapp.views.login"),
     (r'^accounts/logout/$', "webapp.views.logout"),

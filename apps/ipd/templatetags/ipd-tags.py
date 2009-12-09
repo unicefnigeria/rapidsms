@@ -13,6 +13,7 @@ from ipd.models import *
 
 @register.inclusion_tag("ipd/partials/stats.html")
 def ipd_stats():
+    population_target = 190440.0
     return { "stats": [
         {
             "caption": "Reporters",
@@ -36,7 +37,8 @@ def ipd_stats():
         },
         {
             "caption": "Total Missed",
-            "value":   sum(Report.objects.values_list("notimmunized", flat=True))
+            "value":   (population_target - sum(Report.objects.values_list("immunized", flat=True)))
+			#sum(Report.objects.filter(**args).values_list("immunized", flat=True))
         },
         {
             "caption": "Active Responders",
@@ -90,19 +92,23 @@ def daily_progress():
             data.update({
                 "reports": Report.objects.filter(**args).count(),
                 "immunized": sum(Report.objects.filter(**args).values_list("immunized", flat=True)),
-                "notimmunized": sum(Report.objects.filter(**args).values_list("notimmunized", flat=True))
+               #"notimmunized": sum(Report.objects.filter(**args).values_list("notimmunized", flat=True))
+			   "commodity": sum(Report.objects.filter(**args).values_list("commodity", flat=True))
             })
         
             data.update({
                 "reports_perc":    int((data["reports"]    / report_target)    * 100) if (data["reports"]    > 0) else 0,
                 "immunized_perc":    int((data["immunized"]    / population_target)    * 100) if (data["immunized"]    > 0) else 0,
-                "notimmunized_perc":    int((data["notimmunized"]    / population_target)    * 100) if (data["notimmunized"]    > 0) else 0,
+                #"notimmunized_perc":    int((data["notimmunized"]    / population_target)    * 100) if (data["notimmunized"]    > 0) else 0,
+				"notimmunized_perc":	int(((population_target-data["immunized"]) / population_target) * 100 ) if ((population_target-data["immunized"])>0) else 0,
             })
         days.append(data)
     
     total_immunized = sum(Report.objects.all().values_list("immunized", flat=True))
 
-    total_notimmunized = sum(Report.objects.all().values_list("notimmunized", flat=True))
+    #total_notimmunized = sum(Report.objects.all().values_list("notimmunized", flat=True))
+    #total_notimmunized = (population_target - sum(Report.objects.filter(**args).values_list("immunized", flat=True)))
+    total_notimmunized = (population_target - sum(Report.objects.all().values_list("immunized", flat=True)))
     notimmunized_stats = int((float(total_notimmunized) / population_target) * 100) if (total_notimmunized > 0) else 0
     immunized_stats = int((float(total_immunized) / population_target) * 100) if (total_immunized > 0) else 0
 
@@ -126,15 +132,15 @@ def pilot_summary():
         locations = ward.descendants(True)
         nc_reports = NonCompliance.objects.filter(location__in=locations)
         immunization_reports = Report.objects.filter(location__in=locations)
-
+        population_target = 190440.0
         return {
             "name":          ward.name,
             "contact":       ward.one_contact('WS', True),
             "immunization_reports": immunization_reports.count(),
             "nc_reports":    nc_reports.count(),
             "immunized":     sum(immunization_reports.values_list("immunized", flat=True)),
-            "notimmunized":  sum(immunization_reports.values_list("notimmunized", flat=True)),
-            "vaccines":      sum(immunization_reports.values_list("vaccines", flat=True)),
+            "notimmunized":  (population_target - sum(immunization_reports.values_list("immunized", flat=True))),
+            "commodity":      sum(immunization_reports.values_list("commodity", flat=True)),
             "cases":         sum(nc_reports.values_list("cases", flat=True)),
        } 
     # called to fetch and assemble the
@@ -161,7 +167,7 @@ def pilot_summary():
             "population_projected":  int(projections['population'][str(lga.name)]),
             "immunized_total":      int(__wards_total("immunized")),
             "notimmunized_total":   int(__wards_total("notimmunized")),
-            "vaccines_used":             int(__wards_total("vaccines")),
+            "commodity_used":             int(__wards_total("commodity")),
             "wards":                    ward_data,
         }
 
@@ -177,7 +183,7 @@ def immunization_summary_charts():
     population_projected = []
     immunized_total = []
     notimmunized_total = []
-    vaccines_used = []
+    commodity_used = []
     lga_names = []
     pie_data = []
     data =[]
@@ -197,7 +203,7 @@ def immunization_summary_charts():
         population_projected.append("[%f, %f]" % (pilot_lgas.index(lga) * 4 + 0.5, lga['population_projected']))
         immunized_total.append("[%d, %d]" % (pilot_lgas.index(lga) * 4 + 1, lga['immunized_total']))
         notimmunized_total.append("[%f, %f]" % (pilot_lgas.index(lga) * 4 + 1.5, lga['notimmunized_total']))
-        vaccines_used.append("[%d, %d]" % (pilot_lgas.index(lga) * 4 + 2, lga['vaccines_used']))
+        commodity_used.append("[%d, %d]" % (pilot_lgas.index(lga) * 4 + 2, lga['commodity_used']))
         lga_names.append("[%d, '%s']" % (pilot_lgas.index(lga) * 3 + 2, lga['name']))
 
     print "Loaded population"
@@ -207,7 +213,7 @@ def immunization_summary_charts():
         "population_projected": "[%s]" % ",".join(population_projected),
         "immunized_total": "[%s]" % ",".join(immunized_total),
         "notimmunized_total": "[%s]" % ",".join(notimmunized_total),
-        "vaccines_used": "[%s]" % ",".join(vaccines_used),
+        "commodity_used": "[%s]" % ",".join(commodity_used),
         "netcards_projected": "[%s]" % ",".join(netcards_projected),
         "netcards_total": "[%s]" % ",".join(netcards_total),
         "pie_data": pie_data_str,
