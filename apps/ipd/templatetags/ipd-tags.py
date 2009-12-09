@@ -37,7 +37,7 @@ def ipd_stats():
         },
         {
             "caption": "Total Missed",
-            "value":   (population_target - sum(Report.objects.values_list("immunized", flat=True)))
+            "value":   int((population_target - sum(Report.objects.values_list("immunized", flat=True))))
 			#sum(Report.objects.filter(**args).values_list("immunized", flat=True))
         },
         {
@@ -49,8 +49,8 @@ def ipd_stats():
 
 @register.inclusion_tag("ipd/partials/progress.html")
 def daily_progress():
-    start = datetime(2009, 06, 06)
-    end = datetime(2009, 06, 11)
+    start = datetime(2009, 12, 01)
+    end = datetime(2009, 12, 15)
     days = []
     
     
@@ -93,7 +93,7 @@ def daily_progress():
                 "reports": Report.objects.filter(**args).count(),
                 "immunized": sum(Report.objects.filter(**args).values_list("immunized", flat=True)),
                #"notimmunized": sum(Report.objects.filter(**args).values_list("notimmunized", flat=True))
-			   "commodity": sum(Report.objects.filter(**args).values_list("commodity", flat=True))
+			   "commodity": Report.objects.filter(**args).count()
             })
         
             data.update({
