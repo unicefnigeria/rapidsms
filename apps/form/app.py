@@ -174,8 +174,7 @@ class App(rapidsms.app.App):
                             # actions SHOULD send their own confirmation
                             if(after <= before):
                                 # Temporarily disabling this
-                                #message.respond("Received report for %s %s: %s.\nIf this is not correct, reply with CANCEL" % \
-                                    (domain_matched[0], form_matched[0], ", ".join(info)))                        
+                                #message.respond("Received report for %s %s: %s.\nIf this is not correct, reply with CANCEL" % (domain_matched[0], form_matched[0], ", ".join(info)))                        
                                 pass
 
                             if (after > before):
