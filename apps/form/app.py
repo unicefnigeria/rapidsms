@@ -20,9 +20,6 @@ class App(rapidsms.app.App):
         self.separator = "[,\.\s]+"
         self.token_separator = "[,\.\s]*"
         self.leading_pattern = "[\"'\s]*"
-        self.separator = "[,\.\s]+"
-        self.token_separator = "[,\.\s]*"
-        self.leading_pattern = "[\"'\s]*"
         self.trailing_pattern = "[\.,\"'\s]*"
         self.form_patterns = [] 
         self.domains_forms_tokens = []
@@ -178,6 +175,10 @@ class App(rapidsms.app.App):
                             if(after <= before):
                                 message.respond("Received report for %s %s: %s.\nIf this is not correct, reply with CANCEL" % \
                                     (domain_matched[0], form_matched[0], ", ".join(info)))                        
+
+                            if (after > before):
+                                # Report that message has been handled if there were any new responses
+                                app.handled = True
 
                         # oh no! there were validation errors!
                         # since we've already matched the domain
