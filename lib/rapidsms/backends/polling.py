@@ -65,7 +65,10 @@ class Backend(Backend):
             # As a first pass, assume that there is only one message
             # per person in the "handle" phase and we just look it 
             # up in the db
-            original_msg = IncomingMessage.objects.filter(status="H", phone=msg.connection.identity)[0]
+            original_msg = IncomingMessage.objects.filter(status="H", phone=msg.connection.identity)
+            # Retrieve just one of the original_msg objects if there are more
+            if len(original_msg):
+                original_msg = original_msg[0]
             original_msg.responses.add(outgoing)
             original_msg.save()
         except IncomingMessage.DoesNotExist:
