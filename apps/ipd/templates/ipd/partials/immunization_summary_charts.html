@@ -4,7 +4,7 @@ $(document).ready(function(){
 	var immunization_data = [{ bars: { show: true, barWidth:0.5 }, data: {{population_projected|safe}}, label: 'Projected'},
                      		  { bars: { show: true, barWidth:0.5 }, data: {{immunized_total|safe}}, label: 'Immunized'},
                      		  { bars: { show: true, barWidth:0.5 }, data: {{notimmunized_total|safe}}, label: 'Not Im.'},
-                     		  { bars: { show: true, barWidth:0.5 }, data: {{vaccines_used|safe}}, label: 'Vaccines'}];
+                     		  { bars: { show: true, barWidth:0.5 }, data: {{commodity_used|safe}}, label: 'Commodity'}];
 
 
 	var immunization_options = { grid: { show: true, clickable: true },
@@ -34,6 +34,7 @@ var compliance_options_legend = { pie : compliance_options, grid: grid_options, 
 });
 </script>
 <h2>Immnization Summaries</h2>
+
 <div id="immunization_chart" style="width:100%;height:15em">
 </div>
 <div id="immunization_legend" style="width:100%;height:6em;margin-top:1em">

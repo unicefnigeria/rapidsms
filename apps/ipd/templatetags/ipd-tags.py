@@ -11,9 +11,11 @@ from reporters.models import *
 from locations.models import *
 from ipd.models import *
 
+population_target = 19040.0
+
 @register.inclusion_tag("ipd/partials/stats.html")
 def ipd_stats():
-    population_target = 190440.0
+    
     return { "stats": [
         {
             "caption": "Reporters",
@@ -71,7 +73,7 @@ def daily_progress():
     # Kano Municipal    402,919
     # Kura              159,394
     recipient_target = 939172.0
-    population_target = 190440.0
+    
     
     for d in range(0, (end - start).days):
         date = start + timedelta(d)
@@ -92,7 +94,7 @@ def daily_progress():
             data.update({
                 "reports": Report.objects.filter(**args).count(),
                 "immunized": sum(Report.objects.filter(**args).values_list("immunized", flat=True)),
-               #"notimmunized": sum(Report.objects.filter(**args).values_list("notimmunized", flat=True))
+               #"notimmunized": (population_target- sum(Report.objects.filter(**args).values_list("immunized", flat=True))),
 			   "commodity": Report.objects.filter(**args).count()
             })
         
@@ -123,7 +125,7 @@ def daily_progress():
 def pilot_summary():
     
     # fetch all of the LGAs that we want to display
-    lga_names = ["JERE", "MAIDUGURI"]
+    lga_names = ["ALIERO", "AREWA DANDI", "ARGUNGU", "AUGIE"]
     lgas = LocationType.objects.get(name="LGA").locations.filter(name__in=lga_names)
     
     # called to fetch and assemble the
@@ -132,7 +134,7 @@ def pilot_summary():
         locations = ward.descendants(True)
         nc_reports = NonCompliance.objects.filter(location__in=locations)
         immunization_reports = Report.objects.filter(location__in=locations)
-        population_target = 190440.0
+        
         return {
             "name":          ward.name,
             "contact":       ward.one_contact('WS', True),
@@ -148,8 +150,10 @@ def pilot_summary():
     def __lga_data(lga):
         projections = {
             "population" : {
-                        "JERE" : 56726.0,
-                        "MAIDUGURI" : 133714.0
+                        "ALIERO" : 15672.0,
+                        "AREWA DANDI" : 15672.0,
+						"ARGUNGU" : 15672.0,
+						"AUGIE" : 15672.0,
             }
         }
 
@@ -204,10 +208,8 @@ def immunization_summary_charts():
         immunized_total.append("[%d, %d]" % (pilot_lgas.index(lga) * 4 + 1, lga['immunized_total']))
         notimmunized_total.append("[%f, %f]" % (pilot_lgas.index(lga) * 4 + 1.5, lga['notimmunized_total']))
         commodity_used.append("[%d, %d]" % (pilot_lgas.index(lga) * 4 + 2, lga['commodity_used']))
-        lga_names.append("[%d, '%s']" % (pilot_lgas.index(lga) * 3 + 2, lga['name']))
+        lga_names.append("[%d, '%s']" % (pilot_lgas.index(lga) * 4 + 2, lga['name']))
 
-    print "Loaded population"
-    print population_projected
     
     return {
         "population_projected": "[%s]" % ",".join(population_projected),
