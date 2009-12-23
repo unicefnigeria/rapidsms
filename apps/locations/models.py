@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-
+import mptt
 from django.db import models
 from rapidsms.webui.managers import *
 
@@ -23,9 +23,8 @@ class Location(models.Model):
        via the _parent_ field, which can be used to create a hierachy (Country
        -> State -> County -> City) in combination with the _type_ field."""
     
-    objects = RecursiveManager()
     type = models.ForeignKey(LocationType, related_name="locations", blank=True, null=True)
-    name = models.CharField(max_length=100, help_text="Name of location")
+    name = models.CharField(max_length=100, help_text="Name of location", db_index=True)
     code = models.CharField(max_length=30, unique=True)
     
     parent = models.ForeignKey("Location", related_name="children", null=True, blank=True,
@@ -35,7 +34,11 @@ class Location(models.Model):
     latitude  = models.DecimalField(max_digits=8, decimal_places=6, blank=True, null=True, help_text="The physical latitude of this location")
     longitude = models.DecimalField(max_digits=8, decimal_places=6, blank=True, null=True, help_text="The physical longitude of this location")
     
-    
+    lft = models.PositiveIntegerField(blank=True, default=0, db_index=True)
+    rgt = models.PositiveIntegerField(blank=True, default=0, db_index=True)
+    tree_id = models.PositiveIntegerField(blank=True, default=0, db_index=True)
+    level = models.PositiveIntegerField(blank=True, default=0, db_index=True)
+
     def __unicode__(self):
         return self.name
     
@@ -53,27 +56,30 @@ class Location(models.Model):
     def ancestors(self, include_self=False):
         """Returns all of the parent locations of this location,
            optionally including itself in the output. This is
-           very inefficient, so consider caching the output."""
+           very inefficient, so consider caching the output.
+           
+           Tim: This has been better implemented using the Django MPTT
+           library."""
         locs = [self] if include_self else []
         loc = self
         
-        # keep on iterating
-        # until we return
-        while True:
-            locs.append(loc)
-            loc = loc.parent
-            
-            # are we at the top?
-            if loc is None:
-                return locs
+        locs = self.get_ancestors()
+        if include_self:
+            locs.append(self)
+
+        return locs
     
     def descendants(self, include_self=False):
         """Returns all of the locations which are descended from this location,
            optionally including itself in the output. This is very inefficient
-           (it recurses once for EACH), so consider caching the output."""
+           (it recurses once for EACH), so consider caching the output.
+           
+           New improvements, please see doc for ancestors method."""
         locs = [self] if include_self else []
         
-        for loc in self.children.all():
-            locs.extend(loc.descendants(True))
+        locs.extend(self.get_descendants())
         
         return locs
+
+mptt.register(Location, left_attr='lft', right_attr='rgt', 
+            tree_id_attr='tree_id', level_attr='level', order_insertion_by=['code'])
