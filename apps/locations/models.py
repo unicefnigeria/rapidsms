@@ -81,5 +81,14 @@ class Location(models.Model):
         
         return locs
 
+    def get_stock(self):
+        from supply.models import Stock
+        try:
+            stock = Stock.objects.get(location=self)
+        except Stock.DoesNotExist:
+            stock = None
+
+        return stock
+
 mptt.register(Location, left_attr='lft', right_attr='rgt', 
             tree_id_attr='tree_id', level_attr='level', order_insertion_by=['code'])

@@ -140,4 +140,4 @@ def loc_stock_post_init(sender, **kwargs):
         instance.stock = None
 
 # this is the magic that glues the signal to the post load call
-models.signals.post_init.connect(loc_stock_post_init, sender=Location)
+#models.signals.post_init.connect(loc_stock_post_init, sender=Location)

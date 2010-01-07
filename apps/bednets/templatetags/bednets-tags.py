@@ -15,6 +15,7 @@ from bednets.models import *
 from django.db.models import Q
 
 current_campaign_location = Location.objects.get(name="KEBBI", type=LocationType.objects.get(name="State"))
+current_campaign_location_descendants = current_campaign_location.descendants()
 
 @register.inclusion_tag("bednets/partials/recent.html")
 def recent_reporters(number=4):
@@ -32,32 +33,32 @@ def bednets_stats():
 #        },
         {
             "caption": "Reporters",
-            "value":   Reporter.objects.filter(location__in=current_campaign_location.descendants()).count()
+            "value":   Reporter.objects.filter(location__in=current_campaign_location_descendants).count()
         },
         {
             "caption": "Active Locations",
-            "value":   PartialTransaction.objects.filter(destination__in=current_campaign_location.descendants()).values("destination").distinct().count() +
-                       CardDistribution.objects.filter(location__in=current_campaign_location.descendants()).values("location").distinct().count()
+            "value":   PartialTransaction.objects.filter(destination__in=current_campaign_location_descendants).values("destination").distinct().count() +
+                       CardDistribution.objects.filter(location__in=current_campaign_location_descendants).values("location").distinct().count()
         },
         {
             "caption": "Stock Transfers",
-            "value":   PartialTransaction.objects.filter(Q(destination__in=current_campaign_location.descendants())|Q(origin__in=current_campaign_location.descendants())).count()
+            "value":   PartialTransaction.objects.filter(Q(destination__in=current_campaign_location_descendants)|Q(origin__in=current_campaign_location_descendants)).count()
         },
         {
             "caption": "Net Card Reports",
-            "value":   CardDistribution.objects.filter(location__in=current_campaign_location.descendants()).count()
+            "value":   CardDistribution.objects.filter(location__in=current_campaign_location_descendants).count()
         },
         {
             "caption": "Net Cards Distributed",
-            "value":   sum(CardDistribution.objects.filter(location__in=current_campaign_location.descendants()).values_list("distributed", flat=True))
+            "value":   sum(CardDistribution.objects.filter(location__in=current_campaign_location_descendants).values_list("distributed", flat=True))
         },
         {
             "caption": "Net Reports",
-            "value":   NetDistribution.objects.filter(location__in=current_campaign_location.descendants()).count()
+            "value":   NetDistribution.objects.filter(location__in=current_campaign_location_descendants).count()
         },
         {
             "caption": "Nets Distributed",
-            "value":   sum(NetDistribution.objects.filter(location__in=current_campaign_location.descendants()).values_list("distributed", flat=True))
+            "value":   sum(NetDistribution.objects.filter(location__in=current_campaign_location_descendants).values_list("distributed", flat=True))
         },
 #        {
 #            "caption": "Coupon Recipients",
@@ -121,10 +122,10 @@ def daily_progress():
             })
         days.append(data)
     
-    total_netcards = sum(CardDistribution.objects.filter(location__in=current_campaign_location.descendants()).values_list("distributed", flat=True))
+    total_netcards = sum(CardDistribution.objects.filter(location__in=current_campaign_location_descendants).values_list("distributed", flat=True))
     netcards_stats = int(float(total_netcards) / coupon_target * 100) if (total_netcards > 0) else 0
 
-    total_beneficiaries = sum(CardDistribution.objects.filter(location__in=current_campaign_location.descendants()).values_list("people", flat=True))
+    total_beneficiaries = sum(CardDistribution.objects.filter(location__in=current_campaign_location_descendants).values_list("people", flat=True))
     beneficiaries_stats = int(float(total_beneficiaries) / recipient_target * 100) if (total_beneficiaries > 0) else 0
 
     return { "days": days, 

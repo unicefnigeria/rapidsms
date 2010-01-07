@@ -432,8 +432,8 @@ def _get_stock_per_location_strings(locations):
     bar_ticks = []
     for index, location in enumerate(locations):
         # if the location doesn't have any stock we won't display it
-        if location.stock:
-            row = '{"bars":{"show":true},"label":"%s","data":[[%s,%s]]}' % (location.name, index, location.stock.balance)
+        if location.get_stock():
+            row = '{"bars":{"show":true},"label":"%s","data":[[%s,%s]]}' % (location.name, index, location.get_stock().balance)
             bar_ticks.append([index + 0.5, str(location.name[0:2])])
             rows.append(row)
     data = "[%s]" % ", ".join(rows)
