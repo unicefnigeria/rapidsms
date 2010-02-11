@@ -15,7 +15,7 @@ class Campaign(models.Model):
     locations = models.ManyToManyField(Location)
     start_date = models.DateField()
     end_date = models.DateField()
-    app = models.ManyToManyField(Application)
+    apps = models.ManyToManyField(Application)
 
     def __unicode__(self):
         return self.name
