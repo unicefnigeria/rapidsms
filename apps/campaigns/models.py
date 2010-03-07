@@ -32,3 +32,19 @@ class Campaign(models.Model):
                 return self.locations.filter(parent=state) or state.get_children()
         except (Location.DoesNotExist):
             pass
+
+    def cro(self, klass, state, locations=None):
+        ''' Fetches all Campaign Related Objects when supplied the class '''
+        try:
+            if not locations:
+                locations = []
+                locations.append(state)
+                for lga in self.campaign_lgas(state):
+                    locations.append(lga)
+                    for desc in lga.get_descendants():
+                        locations.append(desc)
+
+            return klass.objects.filter(location__in=locations,time__range=(self.start_date,self.end_date))
+        except:
+            pass
+
