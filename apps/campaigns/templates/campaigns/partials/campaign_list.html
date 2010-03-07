@@ -1,0 +1,13 @@
+<script language="javascript">
+$(document).ready(function () {
+  var baseurl = "{{ baseurl }}";
+  $("#campaigns").change(function () { location.href=baseurl + this.value; });
+});
+</script>
+<p align="right"><strong>Choose Campaign:</strong>
+<select name="campaigns" id="campaigns">
+{% for campaign in campaigns %}
+<option value="{{ campaign.campaign_id }}/{{ campaign.state_id }}"{% if campaign.selected %} selected="selected"{% endif %}>{{ campaign.name }}</option>
+{% endfor %}
+</select>
+</p>

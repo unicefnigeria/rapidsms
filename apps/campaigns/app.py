@@ -5,6 +5,8 @@ from models import Application
 
 class App (rapidsms.app.App):
     def start (self):
+        ''' This method was defined to automatically enumerate the list of apps and store them in the Application 
+            model so they can be specified in the different campaigns.'''
         for app in settings.RAPIDSMS_APPS.keys():
             try:
                 appObj = Application.objects.get(name=app)
