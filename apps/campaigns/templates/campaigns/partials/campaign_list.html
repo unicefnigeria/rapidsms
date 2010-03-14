@@ -6,6 +6,7 @@ $(document).ready(function () {
 </script>
 <p align="right"><strong>Choose Campaign:</strong>
 <select name="campaigns" id="campaigns">
+<option value=""> - select campaign - </option>
 {% for campaign in campaigns %}
 <option value="{{ campaign.campaign_id }}/{{ campaign.state_id }}"{% if campaign.selected %} selected="selected"{% endif %}>{{ campaign.name }}</option>
 {% endfor %}

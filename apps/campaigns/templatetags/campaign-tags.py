@@ -21,10 +21,6 @@ def campaigns(baseurl, campaign_id=0, state_id=0):
             campaign_id = campaign.id
 
         for state in campaign.campaign_states():
-            ''' We also need a default state if one hasn't been set '''
-            if not state_id:
-                state_id = state.id
-
             campaigns.append({'name': "%s (%s)" % (campaign, state), \
                 'campaign_id': campaign.id, 'state_id': state.id, 'selected': 1 if (campaign_id == campaign.id and state_id == state.id) else 0 })
     return { "campaigns": campaigns, "baseurl": baseurl }
