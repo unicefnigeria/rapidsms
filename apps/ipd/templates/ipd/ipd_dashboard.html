@@ -1,42 +1,200 @@
 {% extends "layout.html" %}
 {% block title %}IPD Dashboard{% endblock %}
 {% block javascripts %}
-<script type="text/javascript" src="/static/webui/javascripts/jquery.flot.js"></script>
-<script type="text/javascript" src="/static/webui/javascripts/jquery.flot.pie.pack.js"></script>
-<!--[if IE]><script type="text/javascript" src="/static/webui/javascripts/excanvas.pack.js"></script>
+<script type="text/javascript" src="/static/webapp/javascripts/highcharts.js"></script>
+<!--[if IE]>
+<script type="text/javascript" src="/static/webapp/javascripts/excanvas.compiled.js"></script>
 <![endif]-->
 {% endblock %}
 {% load cache %}
-{% load ipd-tags %}
+{% load campaign-tags %}
+{% load campaign-filters %}
 
 {% block content %}
 {# cache content of dashboard for one hour #}
 {% cache 0 ipd_dashboard %}
+<style>
+  .qt { margin-bottom: 2em; }
+  .qt-module-wrapper { margin: auto; width:900px; }
+  .qt-module { width: 180px; float:left }
+  .qt-header { text-align: center; padding: 1em; font-size: 1em; background-color: #fffea7; font-weight: bold; }
+  .qt-body { text-align: center; padding: 0.5em; font-size: 3em; background-color: #ffffbe; }
+  .chart { width: 450px; float: left; }
+  .highcharts-title { background: none; border: 0; }
+  .highcharts-subtitle { background: none; border: 0}
+  .caption a { text-decoration: none; }
+  .caption h3 { font-weight: bold; }
+</style>
 <div class="tmp">
 
-
-<div class="split-3">
-	<div class="left">
-		{% immunization_summary_charts %}
-	</div>
-	<div class="mid">
-		{% daily_progress %}
-	</div>
-	<div class="right">
-		{% ipd_stats %}
-	</div>
-	<div class="clear-hack"></div>
+<div class="split" style="margin-bottom: 2em;">
+  {% campaigns "/ipd/" campaign_id state_id %}
 </div>
 
-<div class="split">
-	<div class="left">
-	</div>
-	<div class="right">
-	</div>
-	<div class="clear-hack"></div>
+<div class="split qt">
+  <div class="qt-module-wrapper">
+    <div class="qt-module">
+      <div class="qt-header">Vaccinations</div>
+      <div class="qt-body">{{ no_of_vaccinations }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Non-Compliance Cases</div>
+      <div class="qt-body">{{ no_of_cases }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Shortages</div>
+      <div class="qt-body">{{ no_of_shortages }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Reporters</div>
+      <div class="qt-body">{{ no_of_reporters }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Active Locations</div>
+      <div class="qt-body">{{ active_locations }}</div>
+    </div>
+  </div>
+  <div class="clear-hack"></div>
 </div>
 
+<div class="split"> 
+	<div class="left tmp"> 
+    <div class="module progress"> 
+    <h2>LGAs Immunization Summary</h2> 
+      <div class="help"> 
+        <p>LGAs Immunization Summary shows a summary of the immunizations reported
+          in the different LGAs and Wards.</p> 
+      </div>
+      <div class="scroller"> 
+        <table class="export">
+        {% if lga_vaccination_summary %}
+          {% for lga_name, lga in lga_vaccination_summary.items %}
+            <thead> 
+              <tr class="caption"> 
+                <td colspan="{{ commodities|length|add:"2" }}"> 
+                  <h3>{{ lga.name }}</h3> 
+                </td> 
+              </tr>
+              <tr> 
+                <th>Ward Name</th> 
+                <th class="min">Total</th> 
+                {% for commodity in commodities %}
+                <th class="min">{{ commodity|upper }}</th>
+                {% endfor %}
+              </tr> 
+            </thead>
+            <tbody> 
+              {% for ward_name, ward in lga.data.items %}
+              <tr class=warning> 
+                <td>{{ ward.name }}</td> 
+                {% if ward.data.total %}<td class="min num">{{ ward.data.total }}{% else %}<td class="mid">-{% endif %}</td>
+                {% for commodity in commodities %}
+                {% if ward.data|key_value:commodity %}
+                <td class="min num">{{ ward.data|key_value:commodity }}</td>
+                {% else %}
+                <td class="mid">-</td>
+                {% endif %}
+                {% endfor %}
+              </tr>
+              {% endfor %}
+              <tr class="totals"> 
+                <td>Total for LGA</td> 
+                <td class="mid">{{ lga.total.total|default:"-" }}</td> 
+                {% for commodity in commodities %}
+                <td class="mid">{{ lga.total|key_value:commodity|default:"-" }}</td>
+                {% endfor %}
+              </tr> 
+              <tr class="summary"> 
+                <td colspan="{{ commodities|length|add:"2" }}"> 
+                  {{ lga.reporters|default:"0" }} supervisor{{ lga.reporters|pluralize }} in {{ lga.data|length }} ward{{ lga.data|length|pluralize }}
+                </td> 
+              </tr> 
+            </tbody>
+          {% endfor %}
+        {% else %}
+          <tbody><tr class="summary"><td>No data available</td></tr></tbody>
+        {% endif %}
+        </table> 
+      </div> 
+    </div> 
+	</div>
 
+	<div class="right tmp"> 
+    <div class="module progress"> 
+    <h2>LGAs Non-Compliance Cases</h2> 
+      <div class="help"> 
+        <p>LGAs Non-Compliance Cases listing the total number of non-compliance cases in the different LGAs and wards. <br /><strong>Key</strong><br />
+        <table style="margin-top:1em">
+        <tr><td>OPV</td><td>OPV Safety</td></tr>
+        <tr><td>CS</td><td>Child Sick</td></tr>
+        <tr><td>RB</td><td>Religious Belief</td></tr>
+        <tr><td>NFN</td><td>No Felt Need</td></tr>
+        <tr><td>PD</td><td>Political Differences</td></tr>
+        <tr><td>NCG</td><td>No Care Giver Consent</td></tr>
+        <tr><td>IP</td><td>Unhappy With Immunization Personnel</td></tr>
+        <tr><td>TMR</td><td>Too Many Rounds</td></tr>
+        <tr><td>RNG</td><td>Reason Not Given</td></tr>
+        </table>
+        </p> 
+      </div> 
+      <div class="scroller"> 
+      <table class="export"> 
+        {% if lga_noncompliance_summary %}
+          {% for lga_name, lga in lga_noncompliance_summary.items %}
+            <thead> 
+              <tr class="caption"> 
+                <td colspan="{{ reasons|length|add:"2" }}"> 
+                  <h3>{{ lga.name }}</h3> 
+                </td> 
+              </tr>
+              <tr> 
+                <th>Ward Name</th> 
+                <th class="min">Total</th> 
+                {% for reason in reasons %}
+                <th class="min">{{ reason|upper }}</th>
+                {% endfor %}
+              </tr> 
+            </thead>
+            <tbody> 
+              {% for ward_name, ward in lga.data.items %}
+              <tr class=warning> 
+                <td>{{ ward.name }}</td> 
+                {% if ward.data.total %}<td class="min num">{{ ward.data.total }}{% else %}<td class="mid">-{% endif %}</td>
+                {% for reason in reasons %}
+                {% if ward.data|key_value:reason %}
+                <td class="min num">{{ ward.data|key_value:reason }}</td>
+                {% else %}
+                <td class="mid">-</td>
+                {% endif %}
+                {% endfor %}
+              </tr>
+              {% endfor %}
+              <tr class="totals"> 
+                <td>Total for LGA</td> 
+                <td class="mid">{{ lga.total.total|default:"-" }}</td> 
+                {% for reason in reasons %}
+                <td class="mid">{{ lga.total|key_value:reason|default:"-" }}</td>
+                {% endfor %}
+              </tr> 
+              <tr class="summary"> 
+                <td colspan="{{ reasons|length|add:"2" }}"> 
+                  {{ lga.reporters|default:"0" }} supervisor{{ lga.reporters|pluralize }} in {{ lga.data|length }} ward{{ lga.data|length|pluralize }}
+                </td> 
+              </tr> 
+            </tbody>
+          {% endfor %}
+        {% else %}
+          <tbody><tr class="summary"><td>No data available</td></tr></tbody>
+        {% endif %}
+        </table> 
+      </div> 
+    </div> 
+	</div> 
+	<div class="clear-hack"></div> 
+</div>
+
+<div style="display:none">
+{% debug %}
 </div>
 {% endcache %}
 {% endblock %}
