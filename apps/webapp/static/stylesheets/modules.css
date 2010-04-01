@@ -481,6 +481,11 @@ table {
 	padding: 0;
 }
 
+/* for blank items display
+ * them centered
+ */
+td.mid {
+	text-align: center; }
 
 /* line-up numbers along their
  * least-significant digit */
