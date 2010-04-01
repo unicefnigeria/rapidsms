@@ -1,0 +1,352 @@
+{% extends "layout.html" %}
+{% block title %}LGA Summary for ALIERO{% endblock %}
+{% block javascripts %}
+<script type="text/javascript" src="/static/webapp/javascripts/highcharts.js"></script>
+<!--[if IE]>
+<script type="text/javascript" src="/static/webapp/javascripts/excanvas.compiled.js"></script>
+<![endif]-->
+{% endblock %}
+{% load cache %}
+{% comment %}{% load ipd-tags %}{% endcomment %}
+
+{% block content %}
+{# cache content of dashboard for one hour #}
+{% cache 0 ipd_dashboard %}
+<style>
+  .chart-2 { width: 450px; float: left; }
+  .chart-3 { width: 300px; float: left; }
+  .highcharts-title { background: none; border: 0; }
+  .highcharts-subtitle { background: none; border: 0}
+  .caption a { text-decoration: none; }
+  .caption h3 { font-weight: bold; }
+</style>
+<div class="tmp">
+
+<div class="split">
+  <h3><strong>Sokoto State &raquo; Aliero LGA</strong></h3>
+</div>
+
+<script language="Javascript">
+$(document).ready(function () {
+  var chart1 = new Highcharts.Chart({
+    chart: { renderTo: 'chart-container-1', defaulSeriesType: 'line' },
+    title: { text: 'Vaccinations', style: { margin: '0 0 0 1em'}},
+    credits: { enabled: false },
+    xAxis: { },
+    yAxis: { title: { text: 'Vaccinations' }, plotLines: [{ value: 0, width: 1, color: '#808080'}]},
+    series: [
+      { name: 'HepB', data: [1, 2, 5, 8, 10, 15, 22, 25, 26]},
+      { name: 'OPV', data: [1, 3, 5, 6, 2, 10, 5, 12, 14]},
+      { name: 'Vit A', data: [1, 4, 8, 10, 12, 5, 3, 1, 3]},
+      { name: 'Measles', data: [1, 5, 3, 5, 9, 11, 2, 4, 6]}
+    ]
+  });
+  var chart2 = new Highcharts.Chart({
+    chart: { renderTo: 'chart-container-2', defaulSeriesType: 'line' },
+    title: { text: 'Non-Compliance Reports', style: { margin: '0 0 0 1em'}},
+    credits: { enabled: false },
+    xAxis: { },
+    yAxis: { title: { text: 'Cases' }, plotLines: [{ value: 0, width: 1, color: '#808080'}]},
+    series: [{ name: 'Religious', data: [1, 2, 5, 8, 10, 15, 22, 25, 26]},
+     { name: 'Too Many Rounds', data: [1, 5, 3, 6, 9, 2, 5, 2, 6]}]
+  });
+  var chart3 = new Highcharts.Chart({
+    chart: { renderTo: 'chart-container-3', defaultSeriesType: 'area'	},
+    credits: { enabled: false },
+    title: { text: 'Vaccinations Over Time'	},
+    xAxis: {},
+    yAxis: {title: {text: 'Vaccinations'	}	},
+    plotOptions: {
+      area: {
+        marker: {
+          enabled: false,
+          symbol: 'circle',
+          radius: 2,
+          states: {
+            hover: {
+              enabled: true
+            }
+          }
+        }
+      }
+    },
+    series: [
+      { name: 'HepB', data: [1, 2, 5, 8, 10, 15, 22, 25, 26]},
+      { name: 'OPV', data: [1, 3, 5, 6, 2, 10, 5, 12, 14]},
+      { name: 'Vit A', data: [1, 4, 8, 10, 12, 5, 3, 1, 3]},
+      { name: 'Measles', data: [1, 5, 3, 5, 9, 11, 2, 4, 6]}
+    ]
+	});
+  var chart4 = new Highcharts.Chart({
+    chart: { renderTo: 'chart-container-4', defaultSeriesType: 'area'	},
+    credits: { enabled: false },
+    title: { text: 'Non-Compliance Reports Over Time'	},
+    xAxis: {},
+    yAxis: {title: {text: 'Cases'	}	},
+    plotOptions: {
+      area: {
+        marker: {
+          enabled: false,
+          symbol: 'circle',
+          radius: 2,
+          states: {
+            hover: {
+              enabled: true
+            }
+          }
+        }
+      }
+    },
+    series: [
+      { name: 'Religious', data: [1, 2, 5, 8, 10, 15, 22, 25, 26]},
+      { name: 'Too Many Rounds', data: [1, 3, 5, 6, 2, 10, 5, 12, 14]},
+      { name: 'Sick Child', data: [1, 4, 8, 10, 12, 5, 3, 1, 3]}
+    ]
+	});
+
+  var chart5 = new Highcharts.Chart({
+    chart: { renderTo: 'chart-container-5' },
+    title: { text: 'Commodity Vaccinations Distribution' },
+    credits: { enabled: false },
+    plotArea: { shadow: null, borderWidth: null, backgroundColor: null },
+    plotOptions: { pie : { dataLabels: { enabled: true, color: 'white', formatter: function () { return this.point.y + "%"; } }} },
+    series: [{
+      type: 'pie',
+      name: 'Commodities',
+      data: [
+        ['OPV', 20],
+        ['HepB', 35],
+        ['Measles', 15],
+        ['Vit. A', 30]
+      ]
+    }]
+  });
+
+  var chart6 = new Highcharts.Chart({
+    chart: { renderTo: 'chart-container-6' },
+    title: { text: 'Hep. B Vaccinations' },
+    credits: { enabled: false },
+    plotArea: { shadow: null, borderWidth: null, backgroundColor: null },
+    plotOptions: { pie : { dataLabels: { enabled: true, color: 'white', formatter: function () { return this.point.y + "%"; } }} },
+    series: [{
+      type: 'pie',
+      name: 'Commodities',
+      data: [
+        ['ALIERO', 5],
+        ['JERE', 15],
+        ['GOBE', 10],
+        ['SHIRYA', 20],
+        ['AUGIE', 15],
+        ['BIRNIN-KEBBI', 5],
+        ['BAGUDO', 10],
+        ['AREWA DANDI', 20]
+      ]
+    }]
+  });
+
+  var chart7 = new Highcharts.Chart({
+    chart: { renderTo: 'chart-container-7' },
+    title: { text: 'Vit. A Vaccinations' },
+    credits: { enabled: false },
+    plotArea: { shadow: null, borderWidth: null, backgroundColor: null },
+    plotOptions: { pie : { dataLabels: { enabled: true, color: 'white', formatter: function () { return this.point.y + "%"; } }} },
+    series: [{
+      type: 'pie',
+      name: 'Commodities',
+      data: [
+        ['ALIERO', 5],
+        ['JERE', 15],
+        ['GOBE', 10],
+        ['SHIRYA', 20],
+        ['AUGIE', 15],
+        ['BIRNIN-KEBBI', 5],
+        ['BAGUDO', 10],
+        ['AREWA DANDI', 20]
+      ]
+    }]
+  });
+
+
+});
+</script>
+
+<div class="split">
+  <div class="chart-2" id="chart-container-1">
+  </div>
+  <div class="chart-2" id="chart-container-2">
+  </div>
+  <div class="clear-hack" style="padding-bottom: 2em;"></div>
+</div>
+
+<div class="split">
+  <div class="chart-2" id="chart-container-3">
+  </div>
+  <div class="chart-2" id="chart-container-4">
+  </div>
+  <div class="clear-hack" style="padding-bottom: 2em;"></div>
+</div>
+
+<div class="split">
+  <div class="chart-3" id="chart-container-5">
+  </div>
+  <div class="chart-3" id="chart-container-6">
+  </div>
+  <div class="chart-3" id="chart-container-7">
+  </div>
+  <div class="clear-hack" style="padding-bottom: 2em;"></div>
+</div>
+
+<div class="split"> 
+	<div class=""> 
+    <div class="module"> 
+    <h2>Wards Immunization Progress Report</h2> 
+      <div class="help"> 
+        <p>LGAs Immunization Summary shows a summary of the immunizations reported
+          in the different LGAs and wards. To view LGA summary, <strong>click on LGA name.</strong></p> 
+      </div> 
+      <div class="scroller"> 
+        <table class="export"> 
+          <thead> 
+            <tr> 
+              <th>Ward</th> 
+              <th class="min">Day 01</th> 
+              <th class="min">Day 02</th> 
+              <th class="min">Day 03</th> 
+              <th class="min">Day 04</th> 
+              <th class="min">Day 05</th> 
+              <th class="min">Day 06</th> 
+              <th class="min">Day 07</th> 
+              <th class="min">Day 08</th> 
+              <th class="min">Day 09</th> 
+              <th class="min">Day 10</th> 
+            </tr> 
+          </thead> 
+          <tbody> 
+            <tr class=warning> 
+              <td>DAN GALADIMA I</td> 
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+            </tr> 
+            <tr class=warning> 
+              <td>DAN GALADIMA II</td> 
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+            </tr> 
+            <tr class=warning> 
+              <td>DAN WARAI</td>
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+            </tr> 
+            <tr> 
+              <td>JIGA BIRNI</td> 
+              <td class="min num">1</td> 
+              <td class="min num">159</td> 
+              <td class="min num">0</td> 
+              <td class="min num">631</td>                               
+              <td class="min num">0</td> 
+              <td class="min num">0</td> 
+              <td class="min num">0</td> 
+              <td class="min num">0</td> 
+              <td class="min num">0</td> 
+              <td class="min num">0</td> 
+            </tr>
+            <tr class=warning> 
+              <td>JIGA MAKERA</td> 
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+            </tr> 
+            <tr class=warning> 
+              <td>KASHIN ZAMA</td> 
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+            </tr> 
+            <tr class=warning> 
+              <td>RAFIN BAUNA</td> 
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+            </tr> 
+            <tr class=warning> 
+              <td>SABIYAL</td> 
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+              <td class="num">0</td>                               
+            </tr> 
+            <tr class="totals"> 
+              <td>Total for LGA</td> 
+              <td class="min num">1</td> 
+              <td class="min num">159</td> 
+              <td class="min num">0</td> 
+              <td class="min num">0</td> 
+              <td class="min num">0</td> 
+              <td class="min num">0</td> 
+              <td class="min num">0</td> 
+              <td class="min num">0</td> 
+              <td class="min num">0</td> 
+              <td class="min num">631</td> 
+            </tr> 
+          </tbody> 
+        </table> 
+      </div> 
+    </div> 
+	</div>
+
+	<div class="clear-hack"></div> 
+</div>
+
+{% endcache %}
+{% endblock %}
