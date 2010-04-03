@@ -7,7 +7,9 @@ from django.template import RequestContext
 from locations.models import Location, LocationType
 from supply.models import Shipment, Transaction, Stock, PartialTransaction
 from bednets import constants
+from campaigns.models import Campaign
 from bednets.models import NetDistribution, CardDistribution 
+from reporters.models import *
 from rapidsms.webui.utils import render_to_response
 from django.db import models
 # The import here newly added for serializations
@@ -18,6 +20,7 @@ from django.utils import simplejson
 
 import time
 import sys
+import itertools
 
 #Parameter for paging reports outputs
 ITEMS_PER_PAGE = 20
@@ -29,9 +32,68 @@ sys.setdefaultencoding('utf-8')
 current_campaign_location = 46214
 
 @permission_required('bednets.can_view')
-def dashboard(req):
-    return render_to_response(req, "bednets/bednets_dashboard.html")
+def dashboard(req, campaign_id=None, state_id=None):
+    campaign = None
+    state=None
+    all_locations = []
+    netcards = []
+    bednets = []
+    supplies = []
+    reporters = []
+    no_of_card_reports = 0
+    no_of_distributed_cards = 0
+    no_of_stock_transfers = 0
+    no_of_net_reports = 0
+    no_of_distributed_nets = 0
+    no_of_reporters = 0
+    active_locations = 0
+	
+    if campaign_id:
+        campaign = Campaign.objects.get(id=campaign_id)
+    	
+    if campaign:
+        if not state_id:
+            state = campaign.campaign_states()[0]
+        else:
+            state = Location.objects.get(pk=state_id)
+        
+        # retrieve all locations
+        all_locations.append(state)
+        for lga in campaign.campaign_lgas(state):
+            all_locations.append(lga)
+            for desc in lga.get_descendants():
+                all_locations.append(desc)
 
+        netcards = campaign.cro(CardDistribution, state, all_locations)
+        bednets = campaign.cro(NetDistribution, state, all_locations)
+        
+        no_of_reporters = Reporter.objects.filter(location__in=all_locations).count()
+        no_of_card_reports = netcards.count()
+        no_of_net_reports = bednets.count()
+        no_of_distributed_cards = sum(netcards.values_list('distributed', flat=True))
+        no_of_distributed_nets = sum(bednets.values_list('distributed', flat=True))
+        
+        card_report_locations = netcards.values_list('location', flat=True)
+        nets_report_locations = bednets.values_list('location', flat=True)
+        all_report_locations = [i for i in itertools.chain(card_report_locations, nets_report_locations)]
+        active_locations = len(set(all_report_locations))
+    else:
+        pass
+		
+    return render_to_response(req, "bednets/bednets_dashboard.html", 
+        {
+        'no_of_stock_transfers': no_of_stock_transfers,
+        'no_of_card_reports': no_of_card_reports,
+        'no_of_distributed_cards': no_of_distributed_cards,
+        'no_of_net_reports': no_of_net_reports,
+        'no_of_distributed_nets': no_of_distributed_nets,
+        'no_of_reporters': no_of_reporters,
+        'active_locations': active_locations,
+        'campaign_id': campaign_id,
+        'state_id': state_id,
+        })
+		
+		
 #Views for handling summary of Reports Displayed as Location Tree
 @permission_required('bednets.can_view')
 def index(req, locid=None):

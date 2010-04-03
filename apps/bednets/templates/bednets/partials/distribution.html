@@ -1,0 +1,53 @@
+<div class="module pilot">
+	<h2>LGA Distribution Summary</h2>
+	<div class="scroller">
+		<table class="export">
+    {% if lgas_distribution %}
+      {% for lga in lgas_distribution %}
+        <thead>
+          <tr class="caption">
+            <td colspan="5">
+              <h3>{{ lga.name }}</h3>
+            </td>
+          </tr>
+          <tr>
+            <th>Ward Name</th>
+            <th class="min">Reports</th>
+            <th class="min">Cards</th>
+            <th class="min">Nets</th>
+            <th class="min">Beneficiaries</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for ward in lga.wards %}
+          <tr class={{ ward.class }}>
+              <td>{{ ward.name }}</td>
+            {% if ward.class %}
+              <td colspan="4">{{ ward.contact }}</td>
+            {% else %}
+              <td class="min num">{{ ward.reports }}</td>
+              <td class="min num">{{ ward.netcards }}</td>
+              <td class="min num">{{ ward.nets }}</td>
+              <td class="min num">{{ ward.beneficiaries }}</td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+          <tr class="totals">
+            <td>Total</td>
+            <td class="min num">{{ lga.reports }}</td>
+            <td class="min num">{{ lga.netcards }}</td>
+            <td class="min num">{{ lga.nets_total }}</td>
+            <td class="min num">{{ lga.beneficiaries }}</td>
+          </tr>
+          <tr class="summary">
+            <td colspan="5">
+              {{ lga.summary }}
+            </td>
+          </tr>
+        </tbody>{% endfor %}
+      {% else %}
+        <tbody><tr class="summary"><td>No data available</td></tr></tbody></td></tr></tbody>
+      {% endif %}
+		</table>
+	</div>
+</div>

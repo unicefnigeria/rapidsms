@@ -1,44 +1,78 @@
 {% extends "layout.html" %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Bednets Dashboard{% endblock %}
 {% block javascripts %}
-<script type="text/javascript" src="/static/webapp/javascripts/jquery.flot.js"></script>
-<script type="text/javascript" src="/static/webapp/javascripts/jquery.flot.pie.pack.js"></script>
-<!--[if IE]><script type="text/javascript" src="/static/webapp/javascripts/excanvas.pack.js"></script>
+<script type="text/javascript" src="/static/webapp/javascripts/highcharts.js"></script>
+<!--[if IE]>
+<script type="text/javascript" src="/static/webapp/javascripts/excanvas.compiled.js"></script>
 <![endif]-->
 {% endblock %}
 {% load cache %}
+{% load campaign-tags %}
 {% load bednets-tags %}
 
 {% block content %}
 {# cache content of dashboard for one hour #}
-{% cache 3600 bednets_dashboard %}
+{% cache 0 bednets_dashboard %}
+<style>
+  .qt-module-wrapper { margin: auto; width:990px; }
+  .qt-module { width: 131px; float:left }
+  .qt-header { text-align: center; padding: 1em; font-size: 0.8em; background-color: #fffea7; font-weight: bold; min-height:1em; }
+  .qt-body { text-align: center; padding: 0.5em; font-size: 2em; background-color: #ffffbe; }
+  .chart { width: 450px; float: left; }
+  .highcharts-title { background: none; border: 0; }
+  .highcharts-subtitle { background: none; border: 0}
+  .caption a { text-decoration: none; }
+  .caption h3 { font-weight: bold; }
+</style>
 <div class="tmp">
 
+<div class="split" style="margin-bottom: 2em;">
+  {% campaigns "/bednets/" campaign_id state_id %}
+</div>
 
-<div class="split-3">
-	<div class="left">
-		{% distribution_summary_charts %}
-	</div>
-	<div class="mid">
-		{% daily_progress %}
-	</div>
-	<div class="right">
-		{% bednets_stats %}
-	</div>
-	<div class="clear-hack"></div>
+<div class="split qt">
+  <div class="qt-module-wrapper">
+    <div class="qt-module">
+      <div class="qt-header">Stock Transfers</div>
+      <div class="qt-body">{{ no_of_stock_transfers }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Card Reports</div>
+      <div class="qt-body">{{ no_of_card_reports }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Cards Distributed</div>
+      <div class="qt-body">{{ no_of_distributed_cards }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Net Reports</div>
+      <div class="qt-body">{{ no_of_net_reports }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Nets Distributed</div>
+      <div class="qt-body">{{ no_of_distributed_nets }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Reporters</div>
+      <div class="qt-body">{{ no_of_reporters }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Active Locations</div>
+      <div class="qt-body">{{ active_locations }}</div>
+    </div>
+  </div>
+  <div class="clear-hack"></div>
 </div>
 
 <div class="split">
-	<div class="left">
-		{% pilot_summary %}
-	</div>
-	<div class="right">
-		{% logistics_summary %}
-	</div>
-	<div class="clear-hack"></div>
+  <div class="left">
+    {% distribution_summary campaign_id state_id %}
+  </div>
+  <div class="right">
+    {% logistics_summary campaign_id state_id %}
+  </div>
+  <div class="clear-hack"></div>
 </div>
 
-
-</div>
 {% endcache %}
 {% endblock %}

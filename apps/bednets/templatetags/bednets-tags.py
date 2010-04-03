@@ -12,6 +12,7 @@ from locations.models import *
 from supply.models import *
 from bednets import constants
 from bednets.models import *
+from campaigns.models import *
 from django.db.models import Q
 
 current_campaign_location = Location.objects.get(name="KEBBI", type=LocationType.objects.get(name="State"))
@@ -135,18 +136,32 @@ def daily_progress():
             "total_beneficiaries": total_beneficiaries}
 
 
-@register.inclusion_tag("bednets/partials/pilot.html")
-def pilot_summary():
-    
-    # fetch all of the LGAs that we want to display
-    lgas = current_campaign_location.children.all()
+@register.inclusion_tag("bednets/partials/distribution.html")
+def distribution_summary(campaign_id, state_id):
+    campaign = None
+    all_locations = []
+    state = None
+
+    if campaign_id:
+        campaign = Campaign.objects.get(id=campaign_id)
+    if campaign:
+        if not state_id:
+            state = campaign.campaign_states()[0]
+        else:
+            state = Location.objects.get(pk=state_id)
+
+        # retrieve all campaign locations
+        all_locations.append(state)
+
+        # fetch all of the LGAs that we want to display
+        lgas = campaign.campaign_lgas(state)
     
     # called to fetch and assemble the
     # data structure for each pilot ward
     def __ward_data(ward):
         locations = ward.descendants(True)
-        reports = CardDistribution.objects.filter(location__in=locations)
-        nets_reports = NetDistribution.objects.filter(location__in=locations)
+        reports = campaign.cro(CardDistribution, state, locations)
+        nets_reports = campaign.cro(NetDistribution, state, locations)
         style = "" 
         if reports.count() == 0:
             style = "warning" 
@@ -164,75 +179,19 @@ def pilot_summary():
     # called to fetch and assemble the
     # data structure for each pilot LGA
     def __lga_data(lga):
-        projections = {
-            "netcards" : {
-                "ALIERO"          : 12090.0,
-                "AREWA DANDI"     : 11300.0,
-                "ARGUNGU"         : 9000.0,
-                "AUGIE"           : 8000.0,
-                "BAGUDO"          : 4000.0,
-                "BIRNIN KEBBI"    : 8000.0,
-                "BUNZA"           : 7000.0,
-                "DANDI"           : 9000.0,
-                "GWANDU"          : 10000.0,
-                "JEGA"            : 15000.0,
-                "KALGO"           : 17000.0,
-                "KOKO/BESSE"      : 12000.0,
-                "MAIYAMA"         : 12000.0,
-                "NGASKI"          : 11000.0,
-                "PAKAL"           : 9000.0,
-                "SAKABA"          : 8000.0,
-                "SHANGA"          : 12000.0,
-                "SURU"            : 11000.0,
-                "WASAGU/DANKO"    : 12000.0,
-                "YAURI"           : 16000.0,
-                "ZURU"            : 18000.0},
-            "beneficiaries" : {
-                "ALIERO"          : 12090.0,
-                "AREWA DANDI"     : 11300.0,
-                "ARGUNGU"         : 9000.0,
-                "AUGIE"           : 8000.0,
-                "BAGUDO"          : 4000.0,
-                "BIRNIN KEBBI"    : 8000.0,
-                "BUNZA"           : 7000.0,
-                "DANDI"           : 9000.0,
-                "GWANDU"          : 10000.0,
-                "JEGA"            : 15000.0,
-                "KALGO"           : 17000.0,
-                "KOKO/BESSE"      : 12000.0,
-                "MAIYAMA"         : 12000.0,
-                "NGASKI"          : 11000.0,
-                "PAKAL"           : 9000.0,
-                "SAKABA"          : 8000.0,
-                "SHANGA"          : 12000.0,
-                "SURU"            : 11000.0,
-                "WASAGU/DANKO"    : 12000.0,
-                "YAURI"           : 16000.0,
-                "ZURU"            : 18000.0},
-        }
-
         wards = lga.children.all()
         reporters = Reporter.objects.filter(location__in=wards)
-        supervisors = reporters.filter(role__code__iexact="WS")
-        summary = "%d supervisors in %d wards" % (supervisors.count(), wards.count())
+        supervisors = reporters.filter(role__code__iexact="WS").count()
+        summary = "%d supervisors in %d wards" % (supervisors, len(wards))
         
         ward_data = map(__ward_data, wards)
         def __wards_total(key):
             return sum(map(lambda w: w[key], ward_data))
         
-        def __stats(key):
-            return int(float(__wards_total(key)) / projections[key][str(lga.name)] * 100) if (__wards_total(key) > 0) else 0 
-
-        # This method to return % of nets/netcards issued. It is believed there could be a better method.
-        def __nets_stats(key):
-            return int (float(__wards_total(key)/__wards_total("netcards")) * 100 ) if (__wards_total(key) > 0 ) else 0
-            
         return {
             "name":                     lga.name,
             "summary":                  summary,
-            "netcards_projected":       int(projections['netcards'][str(lga.name)]),
             "netcards_total":           int(__wards_total("netcards")),
-            "beneficiaries_projected":  int(projections['beneficiaries'][str(lga.name)]),
             "beneficiaries_total":      int(__wards_total("beneficiaries")),
             "wards":                    ward_data,
             "reports":                  __wards_total("reports"),
@@ -240,16 +199,33 @@ def pilot_summary():
             "beneficiaries":            __wards_total("beneficiaries"),
             "nets_total":               __wards_total("nets"),
             "nets_reports":             __wards_total("nets_reports"),
-            "netcards_stats":           __stats("netcards"),
-            "nets_stats":               __nets_stats("nets"),
-            "beneficiaries_stats":      __stats("beneficiaries")
         }
 
-    return { "pilot_lgas": map(__lga_data, lgas) }
+    if campaign and state:
+        return { "lgas_distribution": map(__lga_data, lgas) }
+    else:
+        return { "lgas_distribution": None }
 
 
 @register.inclusion_tag("bednets/partials/logistics.html")
-def logistics_summary():
+def logistics_summary(campaign_id, state_id):
+    campaign = None
+    all_locations = []
+    state = None
+
+    if campaign_id:
+        campaign = Campaign.objects.get(id=campaign_id)
+    if campaign:
+        if not state_id:
+            state = campaign.campaign_states()[0]
+        else:
+            state = Location.objects.get(pk=state_id)
+
+        # retrieve all campaign locations
+        all_locations.append(state)
+
+        # fetch all of the LGAs that we want to display
+        lgas = campaign.campaign_lgas(state)
 
     # called to fetch and assemble the data structure
     # for each LGA, containing the flow of stock
@@ -262,7 +238,10 @@ def logistics_summary():
             "logistician": lga.one_contact('SM', True)}
     
     # process and return data for ALL LGAs for this report
-    return { "lgas": map(__lga_data, current_campaign_location.children.all()) }
+    if campaign and state:
+        return { "lgas": map(__lga_data, lgas) }
+    else:
+        return { "lgas": None }
 
 @register.inclusion_tag("bednets/partials/distribution_summary_charts.html")
 def distribution_summary_charts():

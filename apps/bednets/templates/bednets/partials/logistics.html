@@ -1,5 +1,9 @@
 {% load reporters-tags %}
 
+<style>
+.shrink_table td, .shrink_table th { padding: 0.1em; }
+</style>
+
 <div class="module logistics">
 	<h2>Logistics Summary</h2>
         <div class="help">
@@ -10,8 +14,11 @@
                 added or subtracted.</p>
         </div>
 	<div class="scroller">
-	 	<table class="export">{% for lga in lgas %}{% if lga.transactions %}
-			<thead>
+	 	<table class="export">
+    {% if lgas %}
+    {% for lga in lgas %}
+    {% if lga.transactions %}
+			<thead class="shrink_table">
 				<tr class="caption">
 					<td colspan="6">
 						<h3>{{ lga.name }}</span></h3>
@@ -25,8 +32,8 @@
 				<th><abbr title="Post-Transfer Stock Balance">Stock</abbr></th>
 			</thead>
 			<tbody>
-                                {% for transaction in lga.transactions%}
-				<tr>
+        {% for transaction in lga.transactions%}
+				<tr class="shrink_table">
 					<td title="{% ifequal transaction.type "R" %}Incoming (receipt){% else %}Outgoing (issued){% endifequal %}" class="min dir-{{ transaction.type }}"><span>{{ transaction.type }}</span></td>
 					<td class="min shrink"><span title="{{ transaction.date|date }}">{{ transaction.date|date:"d/m" }}</span></td>
 					<td class="min shrink">{% ifequal transaction.type "R" %}{{ transaction.origin }} &raquo; <b>{{ transaction.destination }}</b>{% else %}<b>{{ transaction.origin }}</b> &raquo; {{ transaction.destination }}{% endifequal %}</td>
@@ -34,18 +41,21 @@
 					<td class="min num">{% ifequal transaction.type "R" %}+{% else %}-{% endifequal %}{{ transaction.amount }}</td>
 					<td class="min num">{{ transaction.stock }}</td>
 				</tr>{% endfor %}
-				<tr class="summary">
+				<tr class="summary shrink_table">
 					<td colspan="6">
 						{{ lga.transactions|length }} Stock transactions since May 05 2009.
 					</td>
 				</tr>
-			</tbody>{% else %}
-                                <thead><tr class="warning">
-                                    <td colspan="6">
-                                        <h3><div>{{ lga.name }}</div><em>No shipments</em>{{ lga.logistician }}</h3>
-                                    </td></tr></thead>
-                                {% endif %}
-                        {% endfor %}
+			</tbody>
+      {% else %}
+      <thead>
+        <tr class="warning shrink_table"><td colspan="6"><h3><div>{{ lga.name }}</div><em>No shipments</em>{{ lga.logistician }}</h3></td></tr>
+      </thead>
+      {% endif %}
+      {% endfor %}
+      {% else %}
+        <tbody><tr class="summary"><td>No data available</td></tr></tbody></td></tr></tbody>
+      {% endif %}
 		</table>
 	</div>
 </div>
