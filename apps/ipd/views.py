@@ -44,6 +44,11 @@ def dashboard(req, campaign_id=None, stateid=None):
     lga_noncompliance_summary_data = {}
     commodities = []
     reasons = []
+    
+    # Obtain campaign data per day
+    campaign_vaccinations = []
+    campaign_cases = {}
+
 
     if campaign_id:
         campaign = Campaign.objects.get(id=campaign_id)
@@ -66,33 +71,36 @@ def dashboard(req, campaign_id=None, stateid=None):
         no_of_reporters = reporters.count()
         active_locations = vaccinations.values("location").distinct().count()
 
-        # Obtain campaign data per day
-        campaign_vaccinations = {}
-        campaign_cases = {}
-
-        # This will be used by the vaccination chart
-        for vaccination in vaccinations:
-            day_delta = (vaccination.time.date() - campaign.start_date).days
-            if not campaign_vaccinations.has_key(day_delta):
-                campaign_vaccinations[day_delta] = {}
-            if not campaign_vaccinations[day_delta].has_key(vaccination.commodity):
-                campaign_vaccinations[day_delta][vaccination.commodity] = vaccination.immunized
-            else:
-                campaign_vaccinations[day_delta][vaccination.commodity] = campaign_vaccinations[day_delta][vaccination.commodity] + vaccination.immunized
-
-        # This will be used in the noncompliance chart
-        for case in cases:
-            day_delta = (case.time.date() - campaign.start_date).days
-            if not campaign_cases.has_key(day_delta):
-                campaign_cases[day_delta] = {}
-            if not campaign_cases[day_delta].has_key(case.reason):
-                campaign_cases[day_delta][case.reason] = case.cases
-            else:
-                campaign_cases[day_delta][case.reason] = campaign_cases[day_delta][case.reason] + case.cases
-
         # Retrieve vaccination commodities to determine which table columns to display in the
         # report
         commodities = vaccinations.values_list('commodity', flat=True).distinct()
+
+        # mapping functions for non-compliance case values
+        reason_map = {'1': "OPV", '2':"CS", '3':"RB", '4':"NFN", '5':"PD", '6':"NCG", '7':"IP", '8':"TMR", '9':"RNG"}
+
+        # retrieves data for the non-compliance table
+        reasons = map(lambda x: reason_map[x], cases.values_list('reason', flat=True).distinct())
+
+        # initialize campaign data per day
+        # we do not want to display all the days of the campaign if we the campaign
+        # is still ongoing so we find the extent to which we've gone in the campaign
+        campaign_end_date = datetime.date.today() if (datetime.date.today() < campaign.end_date) else campaign.end_date
+
+        for day_delta in range((campaign_end_date - campaign.start_date).days):
+            date = campaign.start_date + datetime.timedelta(day_delta)
+            args = { 'time__year': date.year, 'time__month': date.month, 'time__day': date.day }
+
+            data = {
+                "date": date,
+                "total": sum(vaccinations.filter(**args).values_list('immunized', flat=True)),
+            }
+
+            for commodity in commodities:
+                args['commodity'] = commodity
+                data.update({ commodity: sum(vaccinations.filter(**args).values_list('immunized', flat=True))})
+
+            campaign_vaccinations.append(data)
+
 
         lga_vaccination_summary_data = {}
 
@@ -128,12 +136,6 @@ def dashboard(req, campaign_id=None, stateid=None):
 
             lga_vaccination_summary_data[lga.name]['total'] = lga_totals
             lga_vaccination_summary_data[lga.name]['reporters'] = Reporter.objects.filter(location__in=lga.get_descendants()).count()
-
-        # mapping functions for non-compliance case values
-        reason_map = {'1': "OPV", '2':"CS", '3':"RB", '4':"NFN", '5':"PD", '6':"NCG", '7':"IP", '8':"TMR", '9':"RNG"}
-
-        # retrieves data for the non-compliance table
-        reasons = map(lambda x: reason_map[x], cases.values_list('reason', flat=True).distinct())
 
         lga_noncompliance_summary_data = {}
 
@@ -181,6 +183,8 @@ def dashboard(req, campaign_id=None, stateid=None):
         'lga_noncompliance_summary': lga_noncompliance_summary_data,
         'no_of_shortages': no_of_shortages,
         'reasons': reasons,
+        'campaign_vaccinations': campaign_vaccinations,
+        'campaign_cases': campaign_cases,
         'commodities': commodities,
         'no_of_reporters': no_of_reporters,
         'active_locations': active_locations,
