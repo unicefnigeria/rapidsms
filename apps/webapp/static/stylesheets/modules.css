@@ -608,7 +608,7 @@ td.mid {
 .tmp .logistics .scroller {
 	overflow-y: scroll;
 	padding-right: 0.5em;
-	height: 60em;
+	height: 30em;
 }
 
 	.tmp .pilot table,
