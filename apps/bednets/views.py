@@ -12,6 +12,7 @@ from bednets.models import NetDistribution, CardDistribution
 from reporters.models import *
 from rapidsms.webui.utils import render_to_response
 from django.db import models
+from django.db.models import Q
 # The import here newly added for serializations
 from django.core import serializers
 from django.core.paginator import *
@@ -77,6 +78,7 @@ def dashboard(req, campaign_id=None, state_id=None):
         nets_report_locations = bednets.values_list('location', flat=True)
         all_report_locations = [i for i in itertools.chain(card_report_locations, nets_report_locations)]
         active_locations = len(set(all_report_locations))
+        no_of_stock_transfers = PartialTransaction.objects.filter(Q(origin__in=all_locations)|Q(destination__in=all_locations)).count()
     else:
         pass
 		
