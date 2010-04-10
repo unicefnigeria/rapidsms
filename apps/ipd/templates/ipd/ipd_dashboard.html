@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}IPD Dashboard{% endblock %}
+{% block title %}Immunization Dashboard{% endblock %}
 {% block javascripts %}
 <script type="text/javascript" src="/static/webapp/javascripts/highcharts.js"></script>
 <!--[if IE]>
@@ -28,7 +28,7 @@
 <div class="tmp">
 
 <div class="split" style="margin-bottom: 2em;">
-  {% campaigns "/ipd/" campaign_id state_id %}
+  {% campaigns "/im/" campaign_id state_id %}
 </div>
 
 <div class="split qt">

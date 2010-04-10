@@ -6,8 +6,8 @@ from django.conf.urls.defaults import *
 import ipd.views as views
 
 urlpatterns = patterns('',
-    url(r'^ipd/lga/(?P<campaign_id>\d*)/?(?P<locid>\d*)/?$', views.lga_summary),
-    url(r'^ipd/?(?P<campaign_id>\d*)/?(?P<stateid>\d*)/?$', views.dashboard),
-    url(r'^ipd/summary/(?P<locid>\d*)/?$', views.index),
-    url(r'^ipd/compliance/summary/(?P<locid>\d*)/?$', views.compliance_summary),
+    url(r'^im/lga/(?P<campaign_id>\d*)/?(?P<locid>\d*)/?$', views.lga_summary),
+    url(r'^im/?(?P<campaign_id>\d*)/?(?P<stateid>\d*)/?$', views.dashboard),
+    url(r'^im/summary/(?P<locid>\d*)/?$', views.index),
+    url(r'^im/compliance/summary/(?P<locid>\d*)/?$', views.compliance_summary),
 )
