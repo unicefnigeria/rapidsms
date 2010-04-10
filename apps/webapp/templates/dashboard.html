@@ -1,11 +1,5 @@
 {% extends base_template %}
-{% block title %}Dashboard{% endblock %}
-{% block javascripts %}
-<script type="text/javascript" src="/static/webapp/javascripts/jquery.flot.js"></script>
-<script type="text/javascript" src="/static/webapp/javascripts/jquery.flot.pie.pack.js"></script>
-<!--[if IE]><script type="text/javascript" src="/static/webapp/javascripts/excanvas.pack.js"></script>
-<![endif]-->
-{% endblock %}
+{% block title %}RapidSMS Dashboard{% endblock %}
 {% block content %}
 Welcome to RapidSMS! 
 {% if user.is_authenticated %}
