@@ -125,8 +125,8 @@ div.clear-hack {
 	/* global tabs sit on the right,
 	 * page-specific tabs sit on the
 	 * left, to draw more attention */
-	#tabs      { right: 0; }
-	#page-tabs { left: 0;  }
+	#tabs      { left: 0; }
+	#page-tabs { right: 0;  }
 	
 		#tabs li,
 		#page-tabs li {
@@ -138,8 +138,8 @@ div.clear-hack {
 		/* 5px spacing between each tab, to match
 		 * the top gap, since we're using pixel-
 		 * positioned backgrounds */
-		#tabs li      { margin-right: 5px; }
-		#page-tabs li { margin-left: 5px; }
+		#tabs li      { margin-left: 5px; }
+		#page-tabs li { margin-right: 5px; }
 	
 			#tabs li a,
 			#page-tabs li a {
