@@ -24,13 +24,13 @@
 			{% block header %}
 			<div id="header">
                  {% block auth %}
-			                    <div id="auth">
+<!--			                    <div id="auth">
                                         {% if user.is_authenticated %}
                                             <p><a href="/accounts/logout/">Log out {{ user.username }}</a></p>
                                         {% else %}
                                             <p><a href="/accounts/login/">Log in</a></p>
                                         {% endif %}
-                                </div>
+                                </div>-->
                  {% endblock %}
 				<div id="branding">
                    {% block branding %}

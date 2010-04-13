@@ -32,7 +32,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 current_campaign_location = 46214
 
-@permission_required('bednets.can_view')
+#@permission_required('bednets.can_view')
 def dashboard(req, campaign_id=None, state_id=None):
     campaign = None
     state=None
