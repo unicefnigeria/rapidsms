@@ -126,7 +126,7 @@ class BednetsFormsLogic(FormsLogic):
             if Reporter.exists(rep, conn):
                 # if they already exist just re-send a confirmation but don't
                 # create a new instance. 
-                message.respond("Hello again %s!  You are already registered as a %s at %s %s."\
+                message.respond("Hello again %s! You are already registered as a %s at %s %s."\
                                 % (rep.first_name, rep.role, rep.location, rep.location.type), StatusCodes.OK)
                 return
             # if they didn't exist then save them
