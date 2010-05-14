@@ -11,13 +11,14 @@ class Report(models.Model):
     for tracking number of persons immunized'''
 
     IM_COMMODITIES = (
-        ('opv', 'OPV'),
+        ('opv', 'Oral Polio Vaccine'),
         ('vita', 'Vitamin A'),
         ('tt', 'Tetanus Toxoid'),
         ('mv', 'Measles Vaccine'),
+        ('bcg', 'Bacille Calmette-Guerin Vaccine'),
         ('yf', 'Yellow Fever'),
         ('hepb', 'Hepatitis B'),
-        ('folate', 'Ferrous Folate'),
+        ('fe', 'Iron Folate'),
         ('dpt', 'Diphtheria'),
         ('deworm', 'Deworming'),
         ('sp', 'Sulphadoxie Pyrimethanol for IPT'),
