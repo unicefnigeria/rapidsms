@@ -17,7 +17,8 @@
   .qt-module-wrapper { margin: auto; width:990px; }
   .qt-module { width: 131px; float:left }
   .qt-header { text-align: center; padding: 1em; font-size: 0.8em; background-color: #fffea7; font-weight: bold; min-height:1em; }
-  .qt-body { text-align: center; padding: 0.5em; font-size: 2em; background-color: #ffffbe; }
+  .qt-body { text-align: center; padding: 0.5em; font-size: 1.5em; background-color: #ffffbe; }
+  .qt { background-color: #ffffbe; }
   .chart { width: 450px; float: left; }
   .highcharts-title { background: none; border: 0; }
   .highcharts-subtitle { background: none; border: 0}
@@ -43,6 +44,7 @@
     <div class="qt-module">
       <div class="qt-header">Cards Distributed</div>
       <div class="qt-body">{{ no_of_distributed_cards }}</div>
+      {% if no_of_distributed_cards_target %}<div class="qt-body">({{ no_of_distributed_cards_coverage|floatformat }}%)</div>{% endif %}
     </div>
     <div class="qt-module">
       <div class="qt-header">Net Reports</div>
@@ -51,6 +53,7 @@
     <div class="qt-module">
       <div class="qt-header">Nets Distributed</div>
       <div class="qt-body">{{ no_of_distributed_nets }}</div>
+      {% if no_of_distributed_nets_target %}<div class="qt-body">({{ no_of_distributed_nets_coverage|floatformat }}%)</div>{% endif %}
     </div>
     <div class="qt-module">
       <div class="qt-header">Reporters</div>

@@ -35,9 +35,9 @@
           <tr class="totals">
             <td>Total</td>
             <td class="min num">{{ lga.reports }}</td>
-            <td class="min num">{{ lga.netcards }}</td>
-            <td class="min num">{{ lga.nets_total }}</td>
-            <td class="min num">{{ lga.beneficiaries }}</td>
+            <td class="min num">{{ lga.netcards_total }} {% if lga.netcards_total_target %}({{ lga.netcards_total_coverage|floatformat }}%){% endif %}</td>
+            <td class="min num">{{ lga.nets_total }} {% if lga.nets_total_target %}({{ lga.nets_total_coverage|floatformat }}%){% endif %}</td>
+            <td class="min num">{{ lga.beneficiaries_total }}</td>
           </tr>
           <tr class="summary">
             <td colspan="5">

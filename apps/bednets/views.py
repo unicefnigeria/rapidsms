@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/USR/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
 from django.contrib.auth.decorators import permission_required
@@ -43,9 +43,13 @@ def dashboard(req, campaign_id=None, state_id=None):
     reporters = []
     no_of_card_reports = 0
     no_of_distributed_cards = 0
+    no_of_distributed_cards_coverage = 0
+    no_of_distributed_cards_target = 0
     no_of_stock_transfers = 0
     no_of_net_reports = 0
     no_of_distributed_nets = 0
+    no_of_distributed_nets_coverage = 0
+    no_of_distributed_nets_target = 0
     no_of_reporters = 0
     active_locations = 0
 	
@@ -72,8 +76,13 @@ def dashboard(req, campaign_id=None, state_id=None):
         no_of_card_reports = netcards.count()
         no_of_net_reports = bednets.count()
         no_of_distributed_cards = sum(netcards.values_list('distributed', flat=True))
+        no_of_distributed_cards_target = state.population / 5.0
+        no_of_distributed_cards_coverage = (no_of_distributed_cards / no_of_distributed_cards_target) * 100.0 if no_of_distributed_cards_target else 0
+
         no_of_distributed_nets = sum(bednets.values_list('distributed', flat=True))
-        
+        no_of_distributed_nets_target = (state.population / 5.0) * 2.0
+        no_of_distributed_nets_coverage = (no_of_distributed_nets / no_of_distributed_nets_target) * 100.0 if no_of_distributed_nets_target else 0
+
         card_report_locations = netcards.values_list('location', flat=True)
         nets_report_locations = bednets.values_list('location', flat=True)
         all_report_locations = [i for i in itertools.chain(card_report_locations, nets_report_locations)]
@@ -87,8 +96,12 @@ def dashboard(req, campaign_id=None, state_id=None):
         'no_of_stock_transfers': no_of_stock_transfers,
         'no_of_card_reports': no_of_card_reports,
         'no_of_distributed_cards': no_of_distributed_cards,
+        'no_of_distributed_cards_target': no_of_distributed_cards_target,
+        'no_of_distributed_cards_coverage': no_of_distributed_cards_coverage,
         'no_of_net_reports': no_of_net_reports,
         'no_of_distributed_nets': no_of_distributed_nets,
+        'no_of_distributed_nets_target': no_of_distributed_nets_target,
+        'no_of_distributed_nets_coverage': no_of_distributed_nets_coverage,
         'no_of_reporters': no_of_reporters,
         'active_locations': active_locations,
         'campaign_id': campaign_id,

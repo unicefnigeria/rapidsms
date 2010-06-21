@@ -192,12 +192,14 @@ def distribution_summary(campaign_id, state_id):
             "name":                     lga.name,
             "summary":                  summary,
             "netcards_total":           int(__wards_total("netcards")),
+            "netcards_total_target":    lga.population / 5.0, # target = population / 5
+            "netcards_total_coverage":  int(__wards_total("netcards")) / (lga.population / 5.0) * 100.0 if lga.population else 0,
             "beneficiaries_total":      int(__wards_total("beneficiaries")),
             "wards":                    ward_data,
             "reports":                  __wards_total("reports"),
-            "netcards":                 __wards_total("netcards"),
-            "beneficiaries":            __wards_total("beneficiaries"),
             "nets_total":               __wards_total("nets"),
+            "nets_total_target":        (lga.population / 5.0) * 2.0,
+            "nets_total_coverage":      __wards_total("nets") / ((lga.population / 5.0) * 2.0) * 100.0 if lga.population else 0, # nets = cards * 2
             "nets_reports":             __wards_total("nets_reports"),
         }
 
