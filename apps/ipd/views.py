@@ -76,7 +76,7 @@ def dashboard(req, campaign_id=None, stateid=None):
         commodities = vaccinations.values_list('commodity', flat=True).distinct()
 
         # mapping functions for non-compliance case values
-        reason_map = {'1': "OPV", '2':"CS", '3':"RB", '4':"NFN", '5':"PD", '6':"NCG", '7':"IP", '8':"TMR", '9':"RNG"}
+        reason_map = {'0':"", '1':"OPV", '2':"CS", '3':"RB", '4':"NFN", '5':"PD", '6':"NCG", '7':"IP", '8':"TMR", '9':"RNG"}
 
         # retrieves data for the non-compliance table
         reasons = map(lambda x: reason_map[x], cases.values_list('reason', flat=True).distinct())
