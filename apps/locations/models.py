@@ -26,7 +26,7 @@ class Location(models.Model):
     type = models.ForeignKey(LocationType, related_name="locations", blank=True, null=True)
     name = models.CharField(max_length=100, help_text="Name of location", db_index=True)
     code = models.CharField(max_length=30, unique=True)
-    population = models.PositiveIntegerField(blank=True, default=0)
+    population = models.PositiveIntegerField(default=0, null=False, blank=False)
     
     parent = models.ForeignKey("Location", related_name="children", null=True, blank=True,
         help_text="The parent of this Location. Although it is not enforced, it" +\
