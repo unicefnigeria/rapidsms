@@ -80,6 +80,10 @@ def dashboard(req, campaign_id=None, stateid=None):
 
         # retrieves data for the non-compliance table
         reasons = map(lambda x: reason_map[x], cases.values_list('reason', flat=True).distinct())
+        try:
+            reasons.remove("")
+        except ValueError:
+            pass
 
         # initialize campaign data per day
         # we do not want to display all the days of the campaign if we the campaign
