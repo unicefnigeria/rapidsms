@@ -15,6 +15,7 @@ from django.db.models import Q
 import time
 import itertools
 
+@permission_required('bednets.can_view')
 def cards_data(req, campaign_id=None, state_id=None):
     if campaign_id and state_id:
         campaign =  Campaign.objects.get(pk=campaign_id)
