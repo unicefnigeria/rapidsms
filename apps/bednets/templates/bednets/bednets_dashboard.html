@@ -28,6 +28,11 @@
 <div class="tmp">
 
 <div class="split" style="margin-bottom: 2em;">
+  {% if perms.bednets.can_view %}
+  {% if campaign_id %}
+  <div style="float:left"><button onclick="location.href='/bednets/data/cards/{{ campaign_id }}/{{ state_id }}'">Download Cards Data</button></div>
+  {% endif %}
+  {% endif %}
   {% campaigns "/bednets/" campaign_id state_id %}
 </div>
 
