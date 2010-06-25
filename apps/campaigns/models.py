@@ -37,12 +37,16 @@ class Campaign(models.Model):
         ''' Fetches all Campaign Related Objects when supplied the class '''
         try:
             if not locations:
-                locations = []
-                locations.append(state)
-                for lga in self.campaign_lgas(state):
-                    locations.append(lga)
-                    for desc in lga.get_descendants():
-                        locations.append(desc)
+                campaign_lgas = self.campaign_lgas(state)
+                if len(campaign_lgas) == len(Location.objects.filter(parent=state)):
+                    return klass.objects.filter(location__code__startswith=state.code,time__range=(self.start_date,self.end_date))
+                else:
+                    locations = []
+                    locations.append(state)
+                    for lga in self.campaign_lgas(state):
+                        locations.append(lga)
+                        for desc in lga.get_descendants():
+                            locations.append(desc)
 
             return klass.objects.filter(location__in=locations,time__range=(self.start_date,self.end_date))
         except:
