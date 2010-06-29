@@ -24,6 +24,8 @@
   .highcharts-subtitle { background: none; border: 0}
   .caption a { text-decoration: none; }
   .caption h3 { font-weight: bold; }
+  .module h2 { font-size: 1.2em; }
+  .module th + th { text-align: right }
 </style>
 <div class="tmp">
 
@@ -96,7 +98,7 @@
 -->
 
 <div class="split"> 
-	<div class="left tmp"> 
+	<div> 
     <div class="module progress"> 
     <h2>LGAs Immunization Summary</h2> 
       <div class="help"> 
@@ -115,9 +117,9 @@
               </tr>
               <tr> 
                 <th>Ward Name</th> 
-                <th class="min">Total</th> 
+                <th class="min num">Total</th> 
                 {% for commodity in commodities %}
-                <th class="min">{{ commodity|upper }}</th>
+                <th class="min num">{{ commodity|upper }}</th>
                 {% endfor %}
               </tr> 
             </thead>
@@ -125,21 +127,21 @@
               {% for ward_name, ward in lga.data.items %}
               <tr class=warning> 
                 <td>{{ ward.name }}</td> 
-                {% if ward.data.total %}<td class="min num">{{ ward.data.total }}{% else %}<td class="mid">-{% endif %}</td>
+                {% if ward.data.total %}<td class="min num">{{ ward.data.total }}{% else %}<td class="mid num">-{% endif %}</td>
                 {% for commodity in commodities %}
                 {% if ward.data|key_value:commodity %}
                 <td class="min num">{{ ward.data|key_value:commodity }}</td>
                 {% else %}
-                <td class="mid">-</td>
+                <td class="min num">-</td>
                 {% endif %}
                 {% endfor %}
               </tr>
               {% endfor %}
               <tr class="totals"> 
                 <td>Total for LGA</td> 
-                <td class="mid">{{ lga.total.total|default:"-" }}</td> 
+                <td class="min num">{{ lga.total.total|default:"-" }}</td> 
                 {% for commodity in commodities %}
-                <td class="mid">{{ lga.total|key_value:commodity|default:"-" }}</td>
+                <td class="min num">{{ lga.total|key_value:commodity|default:"-" }}</td>
                 {% endfor %}
               </tr> 
               <tr class="summary"> 
@@ -157,7 +159,7 @@
     </div> 
 	</div>
 
-	<div class="right tmp"> 
+	<div> 
     <div class="module progress"> 
     <h2>LGAs Non-Compliance Cases</h2> 
       <div class="help"> 
