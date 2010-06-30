@@ -17,7 +17,7 @@ def region(context, name):
 
     return {
         "name": name,
-        "request": context["request"],
+        "request": context["request"] if context.has_key('request') else None,
         "includes": [
             __path(app)
              for app in settings.RAPIDSMS_APPS.values()
