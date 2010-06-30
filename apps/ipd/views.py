@@ -40,7 +40,7 @@ def dashboard(req, campaign_id=None, stateid=None):
     no_of_shortages = 0
     no_of_reporters = 0
     active_locations = 0
-    lga_vaccination_summary_data = {}
+    lga_vaccination_summary_data = []
     lga_noncompliance_summary_data = {}
     commodities = []
     reasons = []
@@ -48,7 +48,6 @@ def dashboard(req, campaign_id=None, stateid=None):
     # Obtain campaign data per day
     campaign_vaccinations = []
     campaign_cases = {}
-
 
     if campaign_id:
         campaign = Campaign.objects.get(id=campaign_id)
@@ -105,41 +104,36 @@ def dashboard(req, campaign_id=None, stateid=None):
 
             campaign_vaccinations.append(data)
 
-
-        lga_vaccination_summary_data = {}
-
         for lga in campaign.campaign_lgas(state):
-            lga_vaccination_summary_data[lga.name] = {}
-            lga_vaccination_summary_data[lga.name]['name'] = lga.name
-            lga_vaccination_summary_data[lga.name]['data'] = {}
+            L = {}
+            L['name'] = lga.name
+            L['data'] = {}
             lga_totals = {}
 
             for ward in lga.get_children():
-                lga_vaccination_summary_data[lga.name]['data'][ward.name] = {}
-                lga_vaccination_summary_data[lga.name]['data'][ward.name]['name'] = ward.name
-                lga_vaccination_summary_data[lga.name]['data'][ward.name]['data'] = {}
+                L['data'][ward.name] = {}
+                L['data'][ward.name]['name'] = ward.name
+                L['data'][ward.name]['data'] = {}
 
                 ward_totals = {}
                 
-                ward_locations = [ward]
-                ward_locations.extend(ward.get_descendants())
-                
-                ward_reports = vaccinations.filter(location__in=ward_locations,time__range=(campaign.start_date, campaign.end_date)).values('commodity','immunized')
+                ward_reports = vaccinations.filter(location__code__startswith=ward.code,time__range=(campaign.start_date, campaign.end_date)).values('commodity','immunized')
                 for ward_report in ward_reports:
-                    ward_totals['total'] = ward_totals['total'] + ward_report['immunized'] if ward_totals.has_key('total') else ward_report['immunized']
-                    lga_totals['total'] = lga_totals['total'] + ward_report['immunized'] if lga_totals.has_key('total') else ward_report['immunized']
-                    ward_totals[ward_report['commodity']] = ward_totals[ward_report['commodity']] + ward_report['immunized'] if ward_totals.has_key(ward_report['commodity']) else ward_report['immunized']
-                    lga_totals[ward_report['commodity']] = lga_totals[ward_report['commodity']] + ward_report['immunized'] if lga_totals.has_key(ward_report['commodity']) else ward_report['immunized']
+                    ward_totals['total'] = ward_totals['total'] + int(ward_report['immunized']) if ward_totals.has_key('total') else int(ward_report['immunized'])
+                    lga_totals['total'] = lga_totals['total'] + int(ward_report['immunized']) if lga_totals.has_key('total') else int(ward_report['immunized'])
+                    ward_totals[ward_report['commodity']] = ward_totals[ward_report['commodity']] + int(ward_report['immunized']) if ward_totals.has_key(ward_report['commodity']) else int(ward_report['immunized'])
+                    lga_totals[ward_report['commodity']] = lga_totals[ward_report['commodity']] + int(ward_report['immunized']) if lga_totals.has_key(ward_report['commodity']) else int(ward_report['immunized'])
 
                 # ensure that every commodity has a value
                 for commodity in commodities:
                     if not ward_totals.has_key(commodity):
                         ward_totals[commodity] = 0
 
-                lga_vaccination_summary_data[lga.name]['data'][ward.name]['data'] = ward_totals
+                L['data'][ward.name]['data'] = ward_totals
 
-            lga_vaccination_summary_data[lga.name]['total'] = lga_totals
-            lga_vaccination_summary_data[lga.name]['reporters'] = Reporter.objects.filter(location__in=lga.get_descendants()).count()
+            L['total'] = lga_totals
+            L['reporters'] = Reporter.objects.filter(location__code__startswith=lga.code).count()
+            lga_vaccination_summary_data.append(L)
 
         lga_noncompliance_summary_data = {}
 

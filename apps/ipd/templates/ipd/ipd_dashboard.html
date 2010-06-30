@@ -108,7 +108,7 @@
       <div class="scroller"> 
         <table class="export">
         {% if lga_vaccination_summary %}
-          {% for lga_name, lga in lga_vaccination_summary.items %}
+          {% for lga in lga_vaccination_summary %}
             <thead> 
               <tr class="caption"> 
                 <td colspan="{{ commodities|length|add:"2" }}"> 
@@ -158,7 +158,6 @@
       </div> 
     </div> 
 	</div>
-
 	<div> 
     <div class="module progress"> 
     <h2>LGAs Non-Compliance Cases</h2> 
@@ -229,7 +228,7 @@
         </table> 
       </div> 
     </div> 
-	</div> 
+	</div>
 	<div class="clear-hack"></div> 
 </div>
 
