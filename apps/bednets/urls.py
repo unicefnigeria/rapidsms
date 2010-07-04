@@ -7,5 +7,5 @@ import bednets.views as views
 
 urlpatterns = patterns('',
     url(r'^bednets/?(?P<campaign_id>\d*)/?(?P<state_id>\d*)/?$', views.dashboard),
-    url(r'^bednets/data/cards/?(?P<campaign_id>\d*)/?(?P<state_id>\d*)/?$', views.cards_data),
+    url(r'^bednets/data/?(?P<campaign_id>\d*)/?(?P<state_id>\d*)/?$', views.export_data),
 )

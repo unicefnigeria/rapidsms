@@ -16,18 +16,27 @@ import time
 import itertools
 
 @permission_required('bednets.can_view')
-def cards_data(req, campaign_id=None, state_id=None):
-    if campaign_id and state_id:
+def export_data(req, campaign_id=None, state_id=None):
+    if campaign_id and state_id and req.POST.has_key('activity'):
         campaign =  Campaign.objects.get(pk=campaign_id)
-        netcards = campaign.cro(CardDistribution, Location.objects.get(pk=state_id))
-        netcards = netcards.order_by('location','time')
-        t = Template('''id,location_name,location_code,distributed,settlements,people,time
-    {% for card in cards %}
-    {{ card.pk }},{{ card.location.name }},{{ card.location.code }},{{ card.distributed }},{{ card.settlements }},{{ card.people }},{{ card.time }}
-    {% endfor %}''')
-        c = Context({'cards': netcards })
-        response = HttpResponse(t.render(c), mimetype="text/csv")
-        response['Content-Disposition'] = 'attachment; filename=cards_data.csv'
+        if req.POST['activity'] == 'cards':
+            netcards = campaign.cro(CardDistribution, Location.objects.get(pk=state_id))
+            netcards = netcards.order_by('location','time')
+            t = Template('''id,location_name,location_code,distributed,settlements,people,time
+{% for card in cards %}{{ card.pk }},{{ card.location.name }},{{ card.location.code }},{{ card.distributed }},{{ card.settlements }},{{ card.people }},{{ card.time }}
+{% endfor %}''')
+            c = Context({'cards': netcards })
+            response = HttpResponse(t.render(c), mimetype="text/csv")
+            response['Content-Disposition'] = 'attachment; filename=cards_data.csv'
+        elif req.POST['activity'] == 'nets':
+            nets = campaign.cro(NetDistribution, Location.objects.get(pk=state_id))
+            nets = nets.order_by('location','time')
+            t = Template('''id,location_name,location_code,distributed,expected,actual,discrepancy,time
+{% for net in nets %}{{ net.pk }},{{ net.location.name }},{{ net.location.code }},{{ net.distributed }},{{ net.expected }},{{ net.actual }},{{ net.discrepancy }},{{ net.time }}
+{% endfor %}''')
+            c = Context({'nets': nets })
+            response = HttpResponse(t.render(c), mimetype="text/csv")
+            response['Content-Disposition'] = 'attachment; filename=nets_data.csv'
     else:
         response = HttpResponse()
     return response
