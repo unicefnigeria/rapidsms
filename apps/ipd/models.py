@@ -28,7 +28,7 @@ class Report(models.Model):
     reporter = models.ForeignKey(Reporter, null=True, blank=True)
     connection = models.ForeignKey(PersistantConnection, null=True, blank=True)
     location = models.ForeignKey(Location)
-    time = models.DateTimeField()
+    time = models.DateTimeField(db_index=True)
     immunized = models.PositiveIntegerField(blank=True, null=True, help_text="Total Persons Immunized")
     commodity = models.CharField(blank=True, null=True, max_length=10, choices=IM_COMMODITIES, help_text="This is the commodity of the immunization being reported")
 
@@ -57,7 +57,7 @@ class NonCompliance(models.Model):
     reporter = models.ForeignKey(Reporter, null=True, blank=True)
     connection = models.ForeignKey(PersistantConnection, null=True, blank=True)
     location = models.ForeignKey(Location)
-    time = models.DateTimeField()
+    time = models.DateTimeField(db_index=True)
     reason = models.CharField(blank=True, null=True, max_length=1, choices=NC_REASONS, help_text="This is the reason for non-compliance")
     cases = models.PositiveIntegerField()
 
@@ -116,7 +116,7 @@ class Shortage(models.Model):
     # TODO: This has to go!
     connection = models.ForeignKey(PersistantConnection, null=True, blank=True)
     location = models.ForeignKey(Location)
-    time = models.DateTimeField()
+    time = models.DateTimeField(db_index=True)
     commodity = models.CharField(blank=True, null=True, max_length=10, choices=SHORTAGE_COMMODITIES, help_text="This is the commodity of the immunization being reported")
 
     def __unicode__(self):
