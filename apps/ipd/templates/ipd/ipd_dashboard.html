@@ -58,45 +58,6 @@
   </div>
   <div class="clear-hack"></div>
 </div>
-<!-- we want this temporarily hidden
-<div class="split"> 
-	<div class="left tmp"> 
-    <div class="module progress"> 
-    <h2>Daily Immunization Progress</h2> 
-      <div class="scroller"> 
-        <table class="export">
-        {% if lga_vaccination_summary %}
-            <thead> 
-              <tr> 
-                <th>Date</th>
-                <th>Total Immunized</th>
-                {% for commodity in commodities %}
-                <th>{{ commodity|upper }}</th>
-                {% endfor %}
-              </tr> 
-            </thead>
-            <tbody> 
-              {% for day in campaign_vaccinations %}
-              <tr> 
-                <td><span title="{{ day.date|date }}">{{ day.date|date:"d/m" }}</span></td>
-                <td class="min">{{ day.total }}</td>
-                {% for commodity in commodities %}
-                <td class="min">{{ day|key_value:commodity }}</td>
-                {% endfor %}
-              </tr>
-              {% endfor %}
-            </tbody>
-        {% else %}
-          <tbody><tr class="summary"><td>No data available</td></tr></tbody>
-        {% endif %}
-        </table> 
-      </div> 
-    </div> 
-	</div>
-	<div class="clear-hack"></div> 
-</div>
--->
-
 <div class="split"> 
 	<div> 
     <div class="module progress"> 
@@ -124,7 +85,7 @@
               </tr> 
             </thead>
             <tbody> 
-              {% for ward_name, ward in lga.data.items %}
+              {% for ward in lga.data %}
               <tr class=warning> 
                 <td>{{ ward.name }}</td> 
                 {% if ward.data.total %}<td class="min num">{{ ward.data.total }}{% else %}<td class="mid num">-{% endif %}</td>
@@ -179,7 +140,7 @@
       <div class="scroller"> 
       <table class="export"> 
         {% if lga_noncompliance_summary %}
-          {% for lga_name, lga in lga_noncompliance_summary.items %}
+          {% for lga in lga_noncompliance_summary %}
             <thead> 
               <tr class="caption"> 
                 <td colspan="{{ reasons|length|add:"2" }}"> 
@@ -195,7 +156,7 @@
               </tr> 
             </thead>
             <tbody> 
-              {% for ward_name, ward in lga.data.items %}
+              {% for ward in lga.data %}
               <tr class=warning> 
                 <td>{{ ward.name }}</td> 
                 {% if ward.data.total %}<td class="min num">{{ ward.data.total }}{% else %}<td class="mid">-{% endif %}</td>

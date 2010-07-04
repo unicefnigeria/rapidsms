@@ -41,14 +41,10 @@ def dashboard(req, campaign_id=None, stateid=None):
     no_of_reporters = 0
     active_locations = 0
     lga_vaccination_summary_data = []
-    lga_noncompliance_summary_data = {}
+    lga_noncompliance_summary_data = []
     commodities = []
     reasons = []
     
-    # Obtain campaign data per day
-    campaign_vaccinations = []
-    campaign_cases = {}
-
     if campaign_id:
         campaign = Campaign.objects.get(id=campaign_id)
     if campaign:
@@ -84,38 +80,26 @@ def dashboard(req, campaign_id=None, stateid=None):
         except ValueError:
             pass
 
-        # initialize campaign data per day
-        # we do not want to display all the days of the campaign if we the campaign
-        # is still ongoing so we find the extent to which we've gone in the campaign
-        campaign_end_date = datetime.date.today() if (datetime.date.today() < campaign.end_date) else campaign.end_date
-
-        for day_delta in range((campaign_end_date - campaign.start_date).days):
-            date = campaign.start_date + datetime.timedelta(day_delta)
-            args = { 'time__year': date.year, 'time__month': date.month, 'time__day': date.day }
-
-            data = {
-                "date": date,
-                "total": sum(vaccinations.filter(**args).values_list('immunized', flat=True)),
-            }
-
-            for commodity in commodities:
-                args['commodity'] = commodity
-                data.update({ commodity: sum(vaccinations.filter(**args).values_list('immunized', flat=True))})
-
-            campaign_vaccinations.append(data)
-
         for lga in campaign.campaign_lgas(state):
             L = {}
+            L2 = {}
+            
             L['name'] = lga.name
-            L['data'] = {}
+            L2['name'] = lga.name
+            L['data'] = []
+            L2['data'] = []
+            
             lga_totals = {}
-
+            lga_totals_nc = {}
+            
             for ward in lga.get_children():
-                L['data'][ward.name] = {}
-                L['data'][ward.name]['name'] = ward.name
-                L['data'][ward.name]['data'] = {}
+                ward_data_im = {}
+                ward_data_nc = {}
+                ward_data_im['name'] = ward.name
+                ward_data_nc['name'] = ward.name
 
                 ward_totals = {}
+                ward_totals_nc = {}
                 
                 ward_reports = vaccinations.filter(location__code__startswith=ward.code,time__range=(campaign.start_date, campaign.end_date)).values('commodity','immunized')
                 for ward_report in ward_reports:
@@ -129,50 +113,33 @@ def dashboard(req, campaign_id=None, stateid=None):
                     if not ward_totals.has_key(commodity):
                         ward_totals[commodity] = 0
 
-                L['data'][ward.name]['data'] = ward_totals
-
-            L['total'] = lga_totals
-            L['reporters'] = Reporter.objects.filter(location__code__startswith=lga.code).count()
-            lga_vaccination_summary_data.append(L)
-
-        lga_noncompliance_summary_data = {}
-
-        for lga in campaign.campaign_lgas(state):
-            lga_noncompliance_summary_data[lga.name] = {}
-            lga_noncompliance_summary_data[lga.name]['name'] = lga.name
-            lga_noncompliance_summary_data[lga.name]['data'] = {}
-            lga_totals = {}
-
-            for ward in lga.get_children():
-                lga_noncompliance_summary_data[lga.name]['data'][ward.name] = {}
-                lga_noncompliance_summary_data[lga.name]['data'][ward.name]['name'] = ward.name
-                lga_noncompliance_summary_data[lga.name]['data'][ward.name]['data'] = {}
-
-                ward_totals = {}
+                ward_reports_nc = cases.filter(location__code__startswith=ward.code,time__range=(campaign.start_date, campaign.end_date)).values('cases','reason')
+                for ward_report in ward_reports_nc:
+                    ward_totals_nc['total'] = ward_totals_nc['total'] + int(ward_report['cases']) if ward_totals_nc.has_key('total') else int(ward_report['cases'])
+                    lga_totals_nc['total'] = lga_totals_nc['total'] + int(ward_report['cases']) if lga_totals_nc.has_key('total') else int(ward_report['cases'])
+                    ward_totals_nc[reason_map[ward_report['reason']]] = ward_totals_nc[reason_map[ward_report['reason']]] + int(ward_report['cases']) if ward_totals_nc.has_key(reason_map[ward_report['reason']]) else int(ward_report['cases'])
+                    lga_totals_nc[reason_map[ward_report['reason']]] = lga_totals_nc[reason_map[ward_report['reason']]] + int(ward_report['cases']) if lga_totals_nc.has_key(reason_map[ward_report['reason']]) else int(ward_report['cases'])
                 
-                ward_locations = [ward]
-                ward_locations.extend(ward.get_descendants())
-                
-                ward_reports = cases.filter(location__in=ward_locations,time__range=(campaign.start_date, campaign.end_date)).values('cases','reason')
-                for ward_report in ward_reports:
-                    ward_totals['total'] = ward_totals['total'] + ward_report['cases'] if ward_totals.has_key('total') else ward_report['cases']
-                    lga_totals['total'] = lga_totals['total'] + ward_report['cases'] if lga_totals.has_key('total') else ward_report['cases']
-                    ward_totals[reason_map[ward_report['reason']]] = ward_totals[reason_map[ward_report['reason']]] + ward_report['cases'] if ward_totals.has_key(reason_map[ward_report['reason']]) else ward_report['cases']
-                    lga_totals[reason_map[ward_report['reason']]] = lga_totals[reason_map[ward_report['reason']]] + ward_report['cases'] if lga_totals.has_key(reason_map[ward_report['reason']]) else ward_report['cases']
-
                 # ensure that every reason has a value
                 for reason in reasons:
-                    if not ward_totals.has_key(reason):
-                        ward_totals[reason] = 0
+                    if not ward_totals_nc.has_key(reason):
+                        ward_totals_nc[reason] = 0
 
-                lga_noncompliance_summary_data[lga.name]['data'][ward.name]['data'] = ward_totals
+                ward_data_im['data'] = ward_totals
+                L['data'].append(ward_data_im)
+                ward_data_nc['data'] = ward_totals_nc
+                L2['data'].append(ward_data_nc)
 
-            lga_noncompliance_summary_data[lga.name]['total'] = lga_totals
-            lga_noncompliance_summary_data[lga.name]['reporters'] = Reporter.objects.filter(location__in=lga.get_descendants()).count()
+            L['total'] = lga_totals
+            L2['total'] = lga_totals_nc
 
+            L['reporters'] = L2['reporters'] = Reporter.objects.filter(location__code__startswith=lga.code).count()
+            lga_vaccination_summary_data.append(L)
+            lga_noncompliance_summary_data.append(L2)
 
     else:
         pass
+
     return render_to_response(req, "ipd/ipd_dashboard.html", 
         {
         'no_of_vaccinations': no_of_vaccinations,
@@ -181,8 +148,6 @@ def dashboard(req, campaign_id=None, stateid=None):
         'lga_noncompliance_summary': lga_noncompliance_summary_data,
         'no_of_shortages': no_of_shortages,
         'reasons': reasons,
-        'campaign_vaccinations': campaign_vaccinations,
-        'campaign_cases': campaign_cases,
         'commodities': commodities,
         'no_of_reporters': no_of_reporters,
         'active_locations': active_locations,
