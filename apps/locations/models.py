@@ -43,6 +43,9 @@ class Location(models.Model):
     def __unicode__(self):
         return self.name
     
+    class Meta:
+        ordering = ['name']
+
     
     # TODO: how can we port the Location.contacts and Location.one_contact
     #       methods, now that the locations app has been split from reporters?
@@ -91,5 +94,4 @@ class Location(models.Model):
 
         return stock
 
-mptt.register(Location, left_attr='lft', right_attr='rgt', 
-            tree_id_attr='tree_id', level_attr='level', order_insertion_by=['code'])
+mptt.register(Location, left_attr='lft', right_attr='rgt', tree_id_attr='tree_id', level_attr='level', order_insertion_by=['code'])
