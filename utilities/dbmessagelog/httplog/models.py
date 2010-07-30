@@ -11,7 +11,7 @@ class IncomingMessage(models.Model):
     phone = models.CharField(max_length=100)
     time = models.DateTimeField()
     text = models.CharField(max_length=160)
-    status = models.CharField(max_length=1, choices=INCOMING_STATUS_TYPES)
+    status = models.CharField(max_length=1, choices=INCOMING_STATUS_TYPES, db_index=True)
     responses = models.ManyToManyField("OutgoingMessage")
     
     @property 
@@ -30,7 +30,7 @@ class OutgoingMessage(models.Model):
     phone = models.CharField(max_length=100)
     time = models.DateTimeField()
     text = models.CharField(max_length=160)
-    status = models.CharField(max_length=1, choices=OUTGOING_STATUS_TYPES)
+    status = models.CharField(max_length=1, choices=OUTGOING_STATUS_TYPES, db_index=True)
     
     def __unicode__(self):
         return "%s < %s" % (self.phone, self.text)
