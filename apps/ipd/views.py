@@ -4,6 +4,7 @@
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseServerError, Http404
 from django.template import RequestContext
+from django.views.decorators.cache import cache_page
 from reporters.models import Location, LocationType, Reporter
 from ipd.models import NonCompliance, Shortage, Report
 from campaigns.models import Campaign
@@ -27,7 +28,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 #Views for handling summary of Reports Displayed as Location Tree
-#@permission_required('ipd.can_view')
+@cache_page(60 * 15)
 def dashboard(req, campaign_id=None, stateid=None):
     campaign = None
     all_locations = []

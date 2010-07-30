@@ -4,6 +4,7 @@
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseServerError, Http404
 from django.template import RequestContext, Template, Context
+from django.views.decorators.cache import cache_page
 from locations.models import Location, LocationType
 from supply.models import Shipment, Transaction, Stock, PartialTransaction
 from campaigns.models import Campaign
@@ -41,7 +42,7 @@ def export_data(req, campaign_id=None, state_id=None):
         response = HttpResponse()
     return response
 
-#@permission_required('bednets.can_view')
+@cache_page(60 * 15)
 def dashboard(req, campaign_id=None, state_id=None):
     campaign = None
     state=None
