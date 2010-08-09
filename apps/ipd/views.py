@@ -61,7 +61,7 @@ def dashboard(req, campaign_id=None, stateid=None):
         cases = campaign.cro(NonCompliance, state, all_locations)
         shortages = campaign.cro(Shortage, state, all_locations)
         reporters = Reporter.objects.filter(location__in=all_locations)
-        no_of_vaccinations = vaccinations.count()
+        no_of_vaccinations = sum(vaccinations.values_list('immunized', flat=True))
         no_of_cases = cases.count()
         no_of_shortages = shortages.count()
         no_of_reporters = reporters.count()
