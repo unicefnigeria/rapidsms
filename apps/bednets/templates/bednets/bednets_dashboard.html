@@ -1,5 +1,8 @@
 {% extends "layout.html" %}
 {% block title %}Bednets Dashboard{% endblock %}
+{% block page_stylesheets %}
+   <link type="text/css" rel="stylesheet" href="/static/bednets/stylesheets/reports.css" />
+{% endblock %}
 {% block javascripts %}
 <script type="text/javascript" src="/static/webapp/javascripts/highcharts.js"></script>
 <!--[if IE]>
@@ -79,7 +82,7 @@
 </div>
 
 <div class="split">
-  <div class="left">
+  <div class="left dist">
     {% distribution_summary campaign_id state_id %}
   </div>
   <div class="right">

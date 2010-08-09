@@ -21,3 +21,10 @@
 	border-top:1px solid #ccc;
 	background-color: #eee;
 }
+
+.dist th {
+  text-align: right;
+}
+.dist th:first-child {
+  text-align: left;
+}
