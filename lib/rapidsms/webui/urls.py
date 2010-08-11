@@ -4,6 +4,8 @@
 import os, sys
 from rapidsms.webui import settings
 from django.conf.urls.defaults import *
+from django.views.decorators.cache import cache_page
+from django.views.static import serve as static_serve
 
 
 # this list will be populated with the
@@ -39,7 +41,7 @@ for rs_app in settings.RAPIDSMS_APPS.values():
             # of this stuff for apache?
             urlpatterns += patterns("", url(
                 "^static/%s/(?P<path>.*)$" % rs_app["type"],
-                "django.views.static.serve",
+                cache_page(static_serve, 60 * 60 * 24 * 30), # cache static content for thirty days
                 {"document_root": static_dir }
             ))
     
