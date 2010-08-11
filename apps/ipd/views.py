@@ -69,7 +69,7 @@ def dashboard(req, campaign_id=None, stateid=None):
 
         # Retrieve vaccination commodities to determine which table columns to display in the
         # report
-        commodities = vaccinations.values_list('commodity', flat=True).distinct()
+        commodities = [c.lower() for c in vaccinations.values_list('commodity', flat=True).distinct()]
 
         # mapping functions for non-compliance case values
         reason_map = {'0':"", '1':"OPV", '2':"CS", '3':"RB", '4':"NFN", '5':"PD", '6':"NCG", '7':"IP", '8':"TMR", '9':"RNG"}
@@ -106,8 +106,8 @@ def dashboard(req, campaign_id=None, stateid=None):
                 for ward_report in ward_reports:
                     ward_totals['total'] = ward_totals['total'] + int(ward_report['immunized']) if ward_totals.has_key('total') else int(ward_report['immunized'])
                     lga_totals['total'] = lga_totals['total'] + int(ward_report['immunized']) if lga_totals.has_key('total') else int(ward_report['immunized'])
-                    ward_totals[ward_report['commodity']] = ward_totals[ward_report['commodity']] + int(ward_report['immunized']) if ward_totals.has_key(ward_report['commodity']) else int(ward_report['immunized'])
-                    lga_totals[ward_report['commodity']] = lga_totals[ward_report['commodity']] + int(ward_report['immunized']) if lga_totals.has_key(ward_report['commodity']) else int(ward_report['immunized'])
+                    ward_totals[ward_report['commodity'].lower()] = ward_totals[ward_report['commodity'].lower()] + int(ward_report['immunized']) if ward_totals.has_key(ward_report['commodity'].lower()) else int(ward_report['immunized'])
+                    lga_totals[ward_report['commodity'].lower()] = lga_totals[ward_report['commodity'].lower()] + int(ward_report['immunized']) if lga_totals.has_key(ward_report['commodity'].lower()) else int(ward_report['immunized'])
 
                 # ensure that every commodity has a value
                 for commodity in commodities:
