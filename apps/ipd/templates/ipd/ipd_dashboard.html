@@ -7,6 +7,7 @@
 <![endif]-->
 {% endblock %}
 {% load cache %}
+{% load humanize %}
 {% load campaign-tags %}
 {% load campaign-filters %}
 
@@ -18,7 +19,7 @@
   .qt-module-wrapper { margin: auto; width:900px; }
   .qt-module { width: 180px; float:left }
   .qt-header { text-align: center; padding: 1em; font-size: 1em; background-color: #fffea7; font-weight: bold; }
-  .qt-body { text-align: center; padding: 0.5em; font-size: 3em; background-color: #ffffbe; }
+  .qt-body { text-align: center; padding: 0.5em; font-size: 2em; background-color: #ffffbe; }
   .chart { width: 450px; float: left; }
   .highcharts-title { background: none; border: 0; }
   .highcharts-subtitle { background: none; border: 0}
@@ -37,23 +38,23 @@
   <div class="qt-module-wrapper">
     <div class="qt-module">
       <div class="qt-header">Vaccinations</div>
-      <div class="qt-body">{{ no_of_vaccinations }}</div>
+      <div class="qt-body">{{ no_of_vaccinations|intcomma }}</div>
     </div>
     <div class="qt-module">
       <div class="qt-header">Non-Compliance Cases</div>
-      <div class="qt-body">{{ no_of_cases }}</div>
+      <div class="qt-body">{{ no_of_cases|intcomma }}</div>
     </div>
     <div class="qt-module">
       <div class="qt-header">Shortages</div>
-      <div class="qt-body">{{ no_of_shortages }}</div>
+      <div class="qt-body">{{ no_of_shortages|intcomma }}</div>
     </div>
     <div class="qt-module">
       <div class="qt-header">Reporters</div>
-      <div class="qt-body">{{ no_of_reporters }}</div>
+      <div class="qt-body">{{ no_of_reporters|intcomma }}</div>
     </div>
     <div class="qt-module">
       <div class="qt-header">Active Locations</div>
-      <div class="qt-body">{{ active_locations }}</div>
+      <div class="qt-body">{{ active_locations|intcomma }}</div>
     </div>
   </div>
   <div class="clear-hack"></div>
@@ -100,9 +101,9 @@
               {% endfor %}
               <tr class="totals"> 
                 <td>Total for LGA</td> 
-                <td class="min num">{{ lga.total.total|default:"-" }}</td> 
+                <td class="min num">{{ lga.total.total|default:"-"|intcomma }}</td> 
                 {% for commodity in commodities %}
-                <td class="min num">{{ lga.total|key_value:commodity|default:"-" }}</td>
+                <td class="min num">{{ lga.total|key_value:commodity|default:"-"|intcomma }}</td>
                 {% endfor %}
               </tr> 
               <tr class="summary"> 
@@ -171,9 +172,9 @@
               {% endfor %}
               <tr class="totals"> 
                 <td>Total for LGA</td> 
-                <td class="mid">{{ lga.total.total|default:"-" }}</td> 
+                <td class="mid">{{ lga.total.total|default:"-"|intcomma }}</td> 
                 {% for reason in reasons %}
-                <td class="mid">{{ lga.total|key_value:reason|default:"-" }}</td>
+                <td class="mid">{{ lga.total|key_value:reason|default:"-"|intcomma }}</td>
                 {% endfor %}
               </tr> 
               <tr class="summary"> 
