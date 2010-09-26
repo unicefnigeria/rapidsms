@@ -37,6 +37,7 @@ def dashboard(req, campaign_id=None, stateid=None):
     shortages = []
     reporters = []
     no_of_vaccinations = 0
+    no_of_nonvaccinations = 0
     no_of_cases = 0
     no_of_shortages = 0
     no_of_reporters = 0
@@ -62,6 +63,7 @@ def dashboard(req, campaign_id=None, stateid=None):
         shortages = campaign.cro(Shortage, state, all_locations)
         reporters = Reporter.objects.filter(location__in=all_locations)
         no_of_vaccinations = sum(vaccinations.values_list('immunized', flat=True))
+        no_of_nonvaccinations = sum(cases.values_list('cases', flat=True))
         no_of_cases = cases.count()
         no_of_shortages = shortages.count()
         no_of_reporters = reporters.count()
@@ -144,6 +146,7 @@ def dashboard(req, campaign_id=None, stateid=None):
     return render_to_response(req, "ipd/ipd_dashboard.html", 
         {
         'no_of_vaccinations': no_of_vaccinations,
+        'no_of_nonvaccinations': no_of_nonvaccinations,
         'no_of_cases': no_of_cases,
         'lga_vaccination_summary': lga_vaccination_summary_data,
         'lga_noncompliance_summary': lga_noncompliance_summary_data,
