@@ -163,7 +163,7 @@ def distribution_summary(campaign_id, state_id):
         reports = campaign.cro(CardDistribution, state, locations)
         nets_reports = campaign.cro(NetDistribution, state, locations)
         style = "" 
-        if reports.count() == 0:
+        if reports.count() == 0 and nets_reports.count() == 0:
             style = "warning" 
 
         return {
