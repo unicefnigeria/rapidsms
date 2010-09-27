@@ -62,8 +62,8 @@ def dashboard(req, campaign_id=None, stateid=None):
         cases = campaign.cro(NonCompliance, state, all_locations)
         shortages = campaign.cro(Shortage, state, all_locations)
         reporters = Reporter.objects.filter(location__in=all_locations)
-        no_of_vaccinations = sum(vaccinations.values_list('immunized', flat=True))
-        no_of_nonvaccinations = sum(cases.values_list('cases', flat=True))
+        no_of_vaccinations = sum(vaccinations.exclude(commodity=u'').values_list('immunized', flat=True))
+        no_of_nonvaccinations = sum(cases.exclude(reason='0').values_list('cases', flat=True))
         no_of_cases = cases.count()
         no_of_shortages = shortages.count()
         no_of_reporters = reporters.count()
@@ -71,17 +71,13 @@ def dashboard(req, campaign_id=None, stateid=None):
 
         # Retrieve vaccination commodities to determine which table columns to display in the
         # report
-        commodities = [c.lower() for c in vaccinations.values_list('commodity', flat=True).distinct()]
+        commodities = [c.lower() for c in vaccinations.exclude(commodity=u'').values_list('commodity', flat=True).distinct()]
 
         # mapping functions for non-compliance case values
         reason_map = {'0':"", '1':"OPV", '2':"CS", '3':"RB", '4':"NFN", '5':"PD", '6':"NCG", '7':"IP", '8':"TMR", '9':"RNG"}
 
         # retrieves data for the non-compliance table
-        reasons = map(lambda x: reason_map[x], cases.values_list('reason', flat=True).distinct())
-        try:
-            reasons.remove("")
-        except ValueError:
-            pass
+        reasons = map(lambda x: reason_map[x], cases.exclude(reason='0').values_list('reason', flat=True).distinct())
 
         for lga in campaign.campaign_lgas(state):
             L = {}
@@ -104,7 +100,7 @@ def dashboard(req, campaign_id=None, stateid=None):
                 ward_totals = {}
                 ward_totals_nc = {}
                 
-                ward_reports = vaccinations.filter(location__code__startswith=ward.code,time__range=(campaign.start_date, campaign.end_date)).values('commodity','immunized')
+                ward_reports = vaccinations.filter(location__code__startswith=ward.code,commodity__in=commodities,time__range=(campaign.start_date, campaign.end_date)).values('commodity','immunized')
                 for ward_report in ward_reports:
                     ward_totals['total'] = ward_totals['total'] + int(ward_report['immunized']) if ward_totals.has_key('total') else int(ward_report['immunized'])
                     lga_totals['total'] = lga_totals['total'] + int(ward_report['immunized']) if lga_totals.has_key('total') else int(ward_report['immunized'])
@@ -116,7 +112,7 @@ def dashboard(req, campaign_id=None, stateid=None):
                     if not ward_totals.has_key(commodity):
                         ward_totals[commodity] = 0
 
-                ward_reports_nc = cases.filter(location__code__startswith=ward.code,time__range=(campaign.start_date, campaign.end_date)).values('cases','reason')
+                ward_reports_nc = cases.filter(location__code__startswith=ward.code,time__range=(campaign.start_date, campaign.end_date)).exclude(reason='0').values('cases','reason')
                 for ward_report in ward_reports_nc:
                     ward_totals_nc['total'] = ward_totals_nc['total'] + int(ward_report['cases']) if ward_totals_nc.has_key('total') else int(ward_report['cases'])
                     lga_totals_nc['total'] = lga_totals_nc['total'] + int(ward_report['cases']) if lga_totals_nc.has_key('total') else int(ward_report['cases'])
