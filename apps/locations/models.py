@@ -94,4 +94,15 @@ class Location(models.Model):
 
         return stock
 
+class Facility(models.Model):
+    '''A facility can be anything from a cold store to a health facility'''
+    name = models.CharField(max_length=100, help_text='The common name given to the facility')
+    location = models.ForeignKey(Location, related_name="facilities")
+
+    class Meta:
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
+
 mptt.register(Location, left_attr='lft', right_attr='rgt', tree_id_attr='tree_id', level_attr='level', order_insertion_by=['code'])
