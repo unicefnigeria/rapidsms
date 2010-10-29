@@ -5,6 +5,7 @@ from django.template import RequestContext
 from rapidsms.webui.utils import render_to_response
 from django.core.urlresolvers import reverse
 from rapidsms.webui import settings
+from django.views.decorators.cache import never_cache
 import datetime
 import urllib2
 import random
@@ -14,6 +15,7 @@ def index(req):
     return render_to_response(req, template_name, {
     })
 
+@never_cache
 def proxy(req, number, message):
     # build the url to the http server running
     # in ajax.app.App via conf hackery
