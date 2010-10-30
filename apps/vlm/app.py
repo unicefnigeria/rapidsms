@@ -44,7 +44,7 @@ class App(rapidsms.app.App):
 
     @kw("help")
     def help(self, message):
-        message.respond(['receive', 'issue'], StatusCodes.OK)
+        message.respond("['receive', 'issue']", StatusCodes.OK)
         self.handled = True
 
     @kw("(i|issue) from (slug) to (slug) (slug) (slug) (whatever) (numbers) (numbers) (whatever)")
