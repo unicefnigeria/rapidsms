@@ -6,6 +6,7 @@ from rapidsms.parsers.keyworder import *
 from models import *
 from reporters.models import PersistantConnection, Reporter
 from datetime import datetime, timedelta
+from rapidsms.message import StatusCodes
 
 class App(rapidsms.app.App):
 
@@ -43,7 +44,7 @@ class App(rapidsms.app.App):
 
     @kw("help")
     def help(self, message):
-        message.respond(['receive', 'origin'])
+        message.respond(['receive', 'issue'], StatusCodes.OK)
         self.handled = True
 
     @kw("(i|issue) from (slug) to (slug) (slug) (slug) (whatever) (numbers) (numbers) (whatever)")
@@ -51,20 +52,20 @@ class App(rapidsms.app.App):
         try:
             origin_facility = Facility.objects.get(code=origin)
         except Facility.DoesNotExist:
-            message.respond(self.error_msgs['invalid_location'] % origin)
+            message.respond(self.error_msgs['invalid_location'] % origin, StatusCodes.OK)
             self.handled = True
             return True
 
         try:
             destination_facility = Facility.objects.get(code=destination)
         except Facility.DoesNotExist:
-            message.respond(self.error_msgs['invalid_location'] % destination)
+            message.respond(self.error_msgs['invalid_location'] % destination, StatusCodes.OK)
             self.handled = True
             return True
 
         if not commodity in dict(PartialTransaction.COMMODITIES):
             message.respond(self.error_msgs['invalid_commodity'] % (
-                commodity, ", ".join(dict(PartialTransaction.COMMODITIES).keys())))
+                commodity, ", ".join(dict(PartialTransaction.COMMODITIES).keys())), StatusCodes.OK)
             self.handled = True
             return True
 
@@ -107,7 +108,7 @@ class App(rapidsms.app.App):
         message.respond('Report received for VLM ISSUE: from %s to %s COMMODITY: %s, EXPIRY: %s, DOSES: %s, STOCK: %s, VVMSTATUS: %s' % (
             origin_facility, destination_facility, commodity, expiry, qty,
             bal, vvmstatus
-        ))
+        ), StatusCodes.OK)
         self.handled = True
 
     def convert_date(self, date):
@@ -118,20 +119,20 @@ class App(rapidsms.app.App):
         try:
             origin_facility = Facility.objects.get(code=origin)
         except Facility.DoesNotExist:
-            message.respond(self.error_msgs['invalid_location'] % origin)
+            message.respond(self.error_msgs['invalid_location'] % origin, StatusCodes.OK)
             self.handled = True
             return True
 
         try:
             destination_facility = Facility.objects.get(code=destination)
         except Facility.DoesNotExist:
-            message.respond(self.error_msgs['invalid_location'] % destination)
+            message.respond(self.error_msgs['invalid_location'] % destination, StatusCodes.OK)
             self.handled = True
             return True
 
         if not commodity in dict(PartialTransaction.COMMODITIES):
             message.respond(self.error_msgs['invalid_commodity'] % (
-                commodity, ", ".join(dict(PartialTransaction.COMMODITIES).keys())))
+                commodity, ", ".join(dict(PartialTransaction.COMMODITIES).keys())), StatusCodes.OK)
             self.handled = True
             return True
 
@@ -214,10 +215,10 @@ class App(rapidsms.app.App):
         message.respond('Report received for VLM RECEIVE: from %s to %s COMMODITY: %s, EXPIRY: %s, DOSES: %s, STOCK: %s, VVMSTATUS: %s' % (
             origin_facility, destination_facility, commodity, expiry, qty,
             bal, vvmstatus
-        ))
+        ), StatusCodes.OK)
         self.handled = True
 
     @kw('(whatever)')
     def default(self, message, text):
-        message.respond("We didn't understand your message.")
+        message.respond("We didn't understand your message.", StatusCodes.OK)
         self.handled = True
