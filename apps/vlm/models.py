@@ -77,6 +77,7 @@ class Shipment(models.Model):
 
 class Stock(models.Model):
     facility = models.ForeignKey(Facility, related_name="stock")
+    commodity = models.CharField(blank=True, null=True, max_length=10, choices=PartialTransaction.COMMODITIES)
     balance = models.PositiveIntegerField(blank=True, null=True, help_text="Amount of supply at warehouse")
 
     def __unicode__(self):
