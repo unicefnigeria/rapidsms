@@ -1,12 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}Vaccine Logistics Management Dashboard{% endblock %}
-{% block javascripts %}
-<script type="text/javascript" src="/static/vlm/javascripts/vlm.js"></script>
-{% endblock %}
-{% load cache %}
-{% load vlm-tags %}
 {% load humanize %}
-
+{% load vlm-tags %}
 {% block content %}
 <style>
   .qt { margin-bottom: 2em; }
@@ -29,32 +24,18 @@
 
 <div class="split" style="margin-bottom: 2em;">
 <p align="right">
-{% states '/vlm/' %} {% months '/vlm/' %}
+{% states '/vlm/' state_id %} {% months '/vlm/' state_id month_year month_month %}
 </p> 
 </div>
 
 <div class="split qt">
   <div class="qt-module-wrapper">
+	{% for stock_item in stock %}
     <div class="qt-module">
-      <div class="qt-header">VITA</div>
-      <div class="qt-body">230,889</div>
+      <div class="qt-header">{{ stock_item.commodity }}</div>
+      <div class="qt-body">{{ stock_item.balance }}</div>
     </div>
-    <div class="qt-module">
-      <div class="qt-header">DPT</div>
-      <div class="qt-body">120,833</div>
-    </div>
-    <div class="qt-module">
-      <div class="qt-header">OPV</div>
-      <div class="qt-body">330,839</div>
-    </div>
-    <div class="qt-module">
-      <div class="qt-header">HepB</div>
-      <div class="qt-body">110,000</div>
-    </div>
-    <div class="qt-module">
-      <div class="qt-header">TT</div>
-      <div class="qt-body">90,223</div>
-    </div>
+	{% endfor %}
   </div>
   <div class="clear-hack"></div>
 </div>

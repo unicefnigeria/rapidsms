@@ -6,4 +6,5 @@ import views
 
 urlpatterns = patterns('',
     url(r'^vlm/?$', views.dashboard),
+    url(r'^vlm/(?P<state>\d+)/?(?P<year>\d*)/?(?P<month>\d*)/?', views.state_summary),
 )
