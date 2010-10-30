@@ -10,7 +10,7 @@ class Job(BaseJob):
         types = {}
         types = dict(map(lambda loc: [loc.name.upper(), loc], LocationType.objects.all()))
         # create lga stores and state stores
-        all_locations = Location.objects.filter(type__in=[types['LGA'], types['STATE'])
+        all_locations = Location.objects.filter(type__in=[types['LGA'], types['STATE']])
         for location in all_locations:
             Facility(name=location.name, code=location.code, location=location).save()
 
