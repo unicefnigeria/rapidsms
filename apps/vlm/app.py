@@ -162,12 +162,13 @@ class App(rapidsms.app.App):
 
         # stock for facility
         try:
-            stock = Stock.objects.get(facility__code=destination)
+            stock = Stock.objects.get(facility__code=destination, commodity__iexact=commodity)
             stock.balance = bal
             stock.save()
         except Stock.DoesNotExist:
             stock = Stock()
             stock.facility = Facility.objects.get(code=destination)
+            stock.commodity = commodity
             stock.balance = bal
             stock.save()
 
