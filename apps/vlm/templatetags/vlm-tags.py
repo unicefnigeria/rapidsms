@@ -29,3 +29,38 @@ def months(baseurl, state_id=0, year=0, month=0):
             'year': current_year, 'month': mth,
             'selected': 1 if (int(month) == mth) else 0 })
     return { "months": months, "month_baseurl": baseurl, 'month_state_id': state_id }
+
+@register.inclusion_tag("vlm/partials/logistics.html")
+def logistics_summary(campaign_id, state_id):
+    all_locations = []
+    state = None
+
+    if campaign_id:
+        campaign = Campaign.objects.get(id=campaign_id)
+    if campaign:
+        if not state_id:
+            state = campaign.campaign_states()[0]
+        else:
+            state = Location.objects.get(pk=state_id)
+
+        # retrieve all campaign locations
+        all_locations.append(state)
+
+        # fetch all of the LGAs that we want to display
+        lgas = campaign.campaign_lgas(state)
+
+    # called to fetch and assemble the data structure
+    # for each LGA, containing the flow of stock
+    def __lga_data(lga):
+        incoming = PartialTransaction.objects.filter(destination=lga, type__in=["R", "I"]).order_by("-date")
+        outgoing = PartialTransaction.objects.filter(origin=lga, type__in=["R", "I"]).order_by("-date")
+        return {
+            "name":         unicode(lga),
+            "transactions": incoming | outgoing, 
+            "logistician": lga.one_contact('SM', True)}
+    
+    # process and return data for ALL LGAs for this report
+    if campaign and state:
+        return { "lgas": map(__lga_data, lgas) }
+    else:
+        return { "lgas": None }
