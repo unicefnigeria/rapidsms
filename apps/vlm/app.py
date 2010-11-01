@@ -4,15 +4,18 @@
 import rapidsms
 from rapidsms.parsers.keyworder import *
 from models import *
-from reporters.models import PersistantConnection, Reporter
+from reporters.models import PersistantConnection, Reporter, Role
 from datetime import datetime, timedelta
+from locations.models import Location
 from rapidsms.message import StatusCodes
 
 class App(rapidsms.app.App):
 
     kw = Keyworder()
     error_msgs = {
-        'invalid_location': "Sorry, I don't have the facility with the code: %s in my database. Please confirm and try again.",
+        'invalid_facility': "Sorry, I don't have the facility with the code: %s in my database. Please confirm and try again.",
+        'invalid_location': "Sorry, I don't know any location with the code: %s",
+        'invalid_role': "Unknown role code: %s",
         'invalid_commodity': "Hmm... I don't have any recollection of a commodity with the code: %s. I only know the following commodities: %s"
         }
 
@@ -47,19 +50,47 @@ class App(rapidsms.app.App):
         message.respond("['receive', 'issue']", StatusCodes.OK)
         self.handled = True
 
+    @kw('register (numbers) (slug) (whatever)')
+    def register(self, message, location_code, role, name=''):
+        data = {}
+        try:
+            data['location'] = Location.objects.get(code__iexact=location_code)
+            data['role'] = Role.objects.get(code__iexact=role)
+            data['alias'], data['first_name'], data['last_name'] = Reporter.parse_name(name.strip())
+            rep = Reporter(**data)
+            conn = PersistantConnection.from_message(message)
+            if Reporter.exists(rep, conn):
+                message.respond("Hello again %s! You are already registered as a %s at %s %s." % (rep.first_name, rep.role, rep.location, rep.location.type), StatusCodes.OK)
+                self.handled = True
+                return True
+
+            rep.save()
+            conn.reporter = rep
+            conn.save()
+
+            message.respond("Hello %s! You are now registered as %s at %s %s."\
+                            % (rep.first_name, rep.role, rep.location, rep.location.type), StatusCodes.OK)
+        except Role.DoesNotExist:
+            message.respond(self.error_msgs['invalid_role'] % role)
+        except Location.DoesNotExist:
+            message.respond(self.error_msgs['invalid_location'] % location_code)
+        
+        self.handled = True
+        return True
+
     @kw("(i|issue) from (slug) to (slug) (slug) (slug) (whatever) (numbers) (numbers) (whatever)")
     def issue(self, message, command, origin, destination, commodity, batch, expiry, qty, bal, vvmstatus):
         try:
             origin_facility = Facility.objects.get(code=origin)
         except Facility.DoesNotExist:
-            message.respond(self.error_msgs['invalid_location'] % origin, StatusCodes.OK)
+            message.respond(self.error_msgs['invalid_facility'] % origin, StatusCodes.OK)
             self.handled = True
             return True
 
         try:
             destination_facility = Facility.objects.get(code=destination)
         except Facility.DoesNotExist:
-            message.respond(self.error_msgs['invalid_location'] % destination, StatusCodes.OK)
+            message.respond(self.error_msgs['invalid_facility'] % destination, StatusCodes.OK)
             self.handled = True
             return True
 
@@ -119,14 +150,14 @@ class App(rapidsms.app.App):
         try:
             origin_facility = Facility.objects.get(code=origin)
         except Facility.DoesNotExist:
-            message.respond(self.error_msgs['invalid_location'] % origin, StatusCodes.OK)
+            message.respond(self.error_msgs['invalid_facility'] % origin, StatusCodes.OK)
             self.handled = True
             return True
 
         try:
             destination_facility = Facility.objects.get(code=destination)
         except Facility.DoesNotExist:
-            message.respond(self.error_msgs['invalid_location'] % destination, StatusCodes.OK)
+            message.respond(self.error_msgs['invalid_facility'] % destination, StatusCodes.OK)
             self.handled = True
             return True
 
