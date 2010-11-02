@@ -99,7 +99,7 @@ class App(rapidsms.app.App):
         try:
             if not hasattr(message, 'reporter'):
                 raise FormValidationError('unauthorized_reporter')
-            if not message.reporter.role.code.lower() in ['sm', 'nsm', 'rsm']:
+            if not message.reporter.role.code.lower() in ['sm', 'nsm', 'zsm']:
                 raise FormValidationError('unauthorized_role')
 
             reporter = message.reporter
@@ -226,7 +226,7 @@ class App(rapidsms.app.App):
     def convert_date(self, date):
         return datetime.strptime(date, '%d/%m/%Y').date()
 
-    @kw("(r|receive) from (slug) to (slug) (slug) (slug) (whatever) (numbers) (numbers) (whatever)")
+    @kw("(r|received?) from (slug) to (slug) (slug) (slug) (whatever) (numbers) (numbers) (whatever)")
     def receive(self, message, command, origin, destination, commodity, batch, expiry, qty, bal, vvmstatus):
         try:
             origin_facility = Facility.objects.get(code=origin)
