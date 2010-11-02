@@ -21,7 +21,7 @@ class App (rapidsms.app.App):
         # thought it will be better to replace all separators and junk characters with a space
         # and then truncate extra spaces instead of having separate routines for space replacement
         # and then character truncation.
-        separators = [',', '/', ';', '*', '+', '-', ':', '\'', '\"', '`', '(', ')']
+        separators = [',', ';', '*', '+', '-', ':', '\'', '\"', '`', '(', ')']
         for mark in separators:
            msgtxt = msgtxt.replace(mark, ' ') 
 
