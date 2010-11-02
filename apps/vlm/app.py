@@ -8,6 +8,21 @@ from reporters.models import PersistantConnection, Reporter, Role
 from datetime import datetime, timedelta
 from locations.models import Location
 from rapidsms.message import StatusCodes
+import tokenize
+from StringIO import StringIO
+
+class FormValidationError(Exception):
+    error_msgs = {
+        'invalid_facility': "Sorry, I don't have the facility with the code: %s in my database. Please confirm and try again.",
+        'invalid_location': "Sorry, I don't know any location with the code: %s",
+        'invalid_role': "Unknown role code: %s",
+        'invalid_commodity': "Hmm... I don't have any recollection of a commodity with the code: %s. I only know the following commodities: %s",
+        'unauthorized_reporter': 'Please register your number with RapidSMS before sending this report',
+        'unauthorized_role': 'Your role does not have permissions to send this report.',
+        }
+
+    def __init__(self, error_key, error_values=[]):
+        self.msg = self.error_msgs[error_key] % tuple(error_values)
 
 class App(rapidsms.app.App):
 
@@ -47,7 +62,7 @@ class App(rapidsms.app.App):
 
     @kw("help")
     def help(self, message):
-        message.respond("['receive', 'issue']", StatusCodes.OK)
+        message.respond("['receive', 'issue', 'stock', 'register']", StatusCodes.OK)
         self.handled = True
 
     @kw('register (numbers) (slug) (whatever)')
@@ -78,6 +93,72 @@ class App(rapidsms.app.App):
         self.handled = True
         return True
 
+    @kw('stock (slug) (whatever)')
+    def stock(self, message, store_code, commodity_stock):
+        commodity_list = []
+        try:
+            if not hasattr(message, 'reporter'):
+                raise FormValidationError('unauthorized_reporter')
+            if not message.reporter.role.code.lower() in ['sm', 'nsm', 'rsm']:
+                raise FormValidationError('unauthorized_role')
+
+            reporter = message.reporter
+            store = Facility.objects.get(code__iexact=store_code)
+            store_stock = self._parse_commodity_stock(commodity_stock)
+
+            # validate commodities
+            commodities = store_stock.keys()
+            for c in commodities:
+                if not c in dict(PartialTransaction.COMMODITIES):
+                    raise FormValidationError('invalid_commodity', [c, ", ".join(dict(PartialTransaction.COMMODITIES).keys())])
+                    
+            for commodity in store_stock:
+                try:
+                    stock = Stock.objects.get(facility=store,commodity=commodity,time__year=message.date.year,time__month=message.date.month,time__day=message.date.day)
+                    stock.balance = store_stock[commodity]
+                    stock.save()
+                except Stock.DoesNotExist:
+                    data = {'facility': store, 'commodity': commodity,\
+                        'balance': store_stock[commodity],
+                        'time': message.date}
+                    stock = Stock(**data)
+                    stock.save()
+
+                # TODO: It'll be nice to have the actual commodity names
+                # instead of the codes
+                commodity_list.append([commodity, store_stock[commodity]])
+
+            # respond adequately
+            message.respond('Thank you %s. Stock report received for %s Date=%s %s' % (reporter.first_name, store.name, message.date.strftime('%d/%m/%Y'), " ".join(["=".join(entry) for entry in commodity_list])))
+        except Facility.DoesNotExist:
+            message.respond(self.error_msgs['invalid_facility'] % origin)
+        except FormValidationError, f:
+            message.respond(f.msg)
+        except Exception, e:
+            self.debug(e)
+
+        self.handled = True
+        return
+
+    def _parse_commodity_stock(self, s):
+        ''' parses stock lists in the format 
+            stock_commodity ::= string
+            stock_quantity  ::= number
+            stock_item      ::= stock_commodity stock_quantity
+            stock_list      ::= stock_item* '''
+        next_stock = ""
+        stock = {}
+        gen = tokenize.generate_tokens(StringIO(s).readline)
+        for toknum, tokval, _, _, _ in gen:
+            if not next_stock:
+                next_stock = tokval
+            else:
+                if toknum == tokenize.NUMBER:
+                    stock[next_stock] = tokval
+                # reset the next_stock to parse the next stock
+                next_stock = ""
+        return stock
+
     @kw("(i|issue) from (slug) to (slug) (slug) (slug) (whatever) (numbers) (numbers) (whatever)")
     def issue(self, message, command, origin, destination, commodity, batch, expiry, qty, bal, vvmstatus):
         try:
@@ -103,8 +184,8 @@ class App(rapidsms.app.App):
         # partial transaction
         try:
             ten_hrs_ago = datetime.now() - timedelta(0, 36000, 0)
-            pt = PartialTransaction.objects.get(origin__code=origin, destination__code=destination, commodity=commodity, batch=batch, type='I', date__gte=ten_hrs_ago, connection=PersistantConnection.from_message(message))
-            pt.date = datetime.now()
+            pt = PartialTransaction.objects.get(origin__code=origin, destination__code=destination, commodity=commodity, batch=batch, type='I', time__gte=ten_hrs_ago, connection=PersistantConnection.from_message(message))
+            pt.time = datetime.now()
             pt.expiry = self.convert_date(expiry)
             pt.amount = qty
             pt.stock = bal
@@ -120,7 +201,7 @@ class App(rapidsms.app.App):
             pt.batch = batch
             pt.amount = qty
             pt.stock = bal
-            pt.date = datetime.now()
+            pt.time = datetime.now()
             pt.type = 'I'
             pt.save()
 
@@ -170,8 +251,8 @@ class App(rapidsms.app.App):
         # partial transaction
         try:
             ten_hrs_ago = datetime.now() - timedelta(0, 36000, 0)
-            pt_receive = PartialTransaction.objects.get(origin__code=origin, destination__code=destination, commodity=commodity, batch=batch, type='R', date__gte=ten_hrs_ago, connection=PersistantConnection.from_message(message))
-            pt_receive.date = datetime.now()
+            pt_receive = PartialTransaction.objects.get(origin__code=origin, destination__code=destination, commodity=commodity, batch=batch, type='R', time__gte=ten_hrs_ago, connection=PersistantConnection.from_message(message))
+            pt_receive.time = datetime.now()
             pt_receive.expiry = self.convert_date(expiry)
             pt_receive.amount = qty
             pt_receive.stock = bal
@@ -187,7 +268,7 @@ class App(rapidsms.app.App):
             pt_receive.batch = batch
             pt_receive.amount = qty
             pt_receive.stock = bal
-            pt_receive.date = datetime.now()
+            pt_receive.time = datetime.now()
             pt_receive.type = 'R'
             pt_receive.save()
 
@@ -211,16 +292,16 @@ class App(rapidsms.app.App):
             try:
                 shipment = Shipment.objects.get(origin=origin_facility, destination=destination_facility, commodity=commodity, batch=batch)
                 shipment.expiry = self.convert_date(expiry)
-                shipment.sent = pt_issue.date
-                shipment.received = pt_receive.date
+                shipment.sent = pt_issue.time
+                shipment.received = pt_receive.time
             except Shipment.DoesNotExist:
                 shipment = Shipment()
                 shipment.origin = origin_facility
                 shipment.destination = destination_facility
                 shipment.commodity = commodity
                 shipment.expiry = self.convert_date(expiry)
-                shipment.sent = pt_issue.date
-                shipment.received = pt_receive.date
+                shipment.sent = pt_issue.time
+                shipment.received = pt_receive.time
                 shipment.batch = batch
                 shipment.save()
 

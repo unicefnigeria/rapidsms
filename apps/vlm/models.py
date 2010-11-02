@@ -51,7 +51,7 @@ class PartialTransaction(models.Model):
     batch = models.CharField(max_length=15, blank=True, null=True, help_text="Waybill number")
     amount = models.PositiveIntegerField(blank=True, null=True, help_text="Amount of supply shipped")
     stock = models.PositiveIntegerField(blank=True, null=True, help_text="Amount of stock present at location.")
-    date = models.DateTimeField()
+    time = models.DateTimeField()
     # this could be a boolean, but is more readable this way
     type = models.CharField(max_length=1, choices=TRANSACTION_TYPES)
     status = models.CharField(max_length=1, choices=STATUS_TYPES)
@@ -89,6 +89,7 @@ class Stock(models.Model):
     facility = models.ForeignKey(Facility, related_name="stock")
     commodity = models.CharField(blank=True, null=True, max_length=10, choices=PartialTransaction.COMMODITIES)
     balance = models.PositiveIntegerField(blank=True, null=True, help_text="Amount of supply at warehouse")
+    time = models.DateTimeField()
 
     def __unicode__(self):
         return "%s (%s doses)" % (self.facility, self.balance)
@@ -107,6 +108,7 @@ class Transaction(models.Model):
     issue = models.ForeignKey(PartialTransaction, related_name='issues')
     receipt = models.ForeignKey(PartialTransaction, related_name='receipts')
     flag = models.CharField(blank=True, null=True, max_length=1, choices=FLAG_TYPES)
+    time = models.DateTimeField()
 
     def __unicode__(self):
         return "%s (%s) ==> %s (%s)" % (self.shipment.origin.name, self.amount_sent, self.shipment.destination.name, self.amount_received)
