@@ -8,8 +8,6 @@ from reporters.models import PersistantConnection, Reporter, Role
 from datetime import datetime, timedelta
 from locations.models import Location
 from rapidsms.message import StatusCodes
-import tokenize
-from StringIO import StringIO
 
 class FormValidationError(Exception):
     error_msgs = {
@@ -148,14 +146,12 @@ class App(rapidsms.app.App):
             stock_list      ::= stock_item* '''
         next_stock = ""
         stock = {}
-        gen = tokenize.generate_tokens(StringIO(s).readline)
-        for toknum, tokval, _, _, _ in gen:
+        gen = s.split()
+        for token in gen:
             if not next_stock:
-                next_stock = tokval
+                next_stock = token
             else:
-                if toknum == tokenize.NUMBER:
-                    stock[next_stock] = tokval
-                # reset the next_stock to parse the next stock
+                stock[next_stock] = token
                 next_stock = ""
         return stock
 
