@@ -10,7 +10,7 @@ except ImportError:
 class App (rapidsms.app.App):
     def start (self):
         """Configure your app in the start phase."""
-        self.pattern = re.compile(r"(?P<date>(\d+[,./-;:]\d+|\d+[,./-;:]\d+[,./-;:]\d+))$")
+        self.pattern = re.compile(r"(?P<date>(\d+[\,\.\/\-\;\:]\d+|\d+[\,\.\/\-\;\:]\d+[\,\.\/\-\;\:]\d+))$")
 
     def parse (self, message):
         '''The purpose of this method is to look for any strings resembling
