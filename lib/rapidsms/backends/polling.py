@@ -69,13 +69,9 @@ class Backend(Backend):
             # Retrieve just one of the original_msg objects if there are more
             if len(original_msg):
                 original_msg = original_msg[0]
-            original_msg.responses.add(outgoing)
-            original_msg.save()
+                original_msg.responses.add(outgoing)
+                original_msg.save()
         except IncomingMessage.DoesNotExist:
             # this might just be a standard outgoing message 
             # so don't do anything special
             pass
-        except AttributeError:
-            pass
-        
-        
