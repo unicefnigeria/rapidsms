@@ -66,15 +66,16 @@ class Backend(Backend):
             # per person in the "handle" phase and we just look it 
             # up in the db
             original_msg = IncomingMessage.objects.filter(status="H", phone=msg.connection.identity)
-            # The filter method of the object manager also returns a list *always* (even if empty)
+            # Retrieve just one of the original_msg objects if there are more
             if len(original_msg):
-                # Retrieve just one of the original_msg objects if there are more
                 original_msg = original_msg[0]
-                original_msg.responses.add(outgoing)
-                original_msg.save()
+            original_msg.responses.add(outgoing)
+            original_msg.save()
         except IncomingMessage.DoesNotExist:
             # this might just be a standard outgoing message 
             # so don't do anything special
+            pass
+        except AttributeError:
             pass
         
         
