@@ -25,10 +25,10 @@
 
 <div class="split">
 <p style="display:inline;float:left">
-	<strong>State Stock Summary</strong>
+	<strong>{% if state_id %}State{% else %}Zonal{% endif %} Stock Summary</strong>
 </p>
 <p style="display:inline;float:right">
-{% states '/vlm/' state_id %} {% months '/vlm/' state_id month_year month_month %}
+{% zones '/vlm/' zone_id %} {% states '/vlm/' zone_id state_id %} {% months '/vlm/' zone_id state_id month_year month_month %}
 </p> 
 </div>
 
@@ -48,7 +48,7 @@
 <div class="split"> 
 	<div> 
     <div class="module progress"> 
-    <h2>LGAs Stock Summary</h2> 
+    <h2>{% if state_id %}LGAs{% else %}States{% endif %} Stock Summary</h2> 
       <div class="help"> 
         <p>LGAs Vaccine Stock Summary shows a summation of the stock of vaccines contains in all the wards and health facilities in an LGA</p> 
       </div>
@@ -56,19 +56,19 @@
         <table class="export">
 						<thead>
 							<tr>
-								<th>LGA</th>
+								<th>{% if state_id %}LGA{% else %}State{% endif %}</th>
 								{% for commodity in commodities %}
 								<th class="min num">{{ commodity_names|key_value:commodity }}</th>
 								{% endfor %}
 							</tr>
 						</thead>
-        {% if lga_stock %}
+        {% if sub_locations_stock %}
             <tbody>
-            {% for lga in lga_stock %}
+            {% for sub_location in sub_locations_stock %}
               <tr class="warning"> 
-                <td>{{ lga.lga }}</td> 
+                <td>{{ sub_location.sub_location }}</td> 
                 {% for commodity in commodities %}
-                <td class="min num">{{ lga.commodities|key_value:commodity|default:"-"|intcomma }}</td>
+                <td class="min num">{{ sub_location.commodities|key_value:commodity|default:"-"|intcomma }}</td>
                 {% endfor %}
               </tr>
             {% endfor %}

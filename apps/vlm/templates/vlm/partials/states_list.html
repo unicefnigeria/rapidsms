@@ -1,6 +1,6 @@
 <script language="javascript">
 $(document).ready(function () {
-  var baseurl = "{{ baseurl }}";
+  var baseurl = "{{ baseurl }}{{ zone_id }}/";
   $("#states").change(function () { location.href=baseurl + this.value; });
 });
 </script>

@@ -1,6 +1,6 @@
 <script language="javascript">
 $(document).ready(function () {
-  var statesurl = "{{ month_baseurl }}{{ month_state_id }}/";
+  var statesurl = "{{ month_baseurl }}{{ month_zone_id }}/{{ month_state_id }}/";
   $("#month_selector").change(function () { location.href=statesurl + this.value; });
 });
 </script>
