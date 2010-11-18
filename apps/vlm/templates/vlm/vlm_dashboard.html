@@ -37,7 +37,7 @@
 
 <div class="split qt">
   <div class="qt-module-wrapper">
-		<h2>National Store Stock Levels</h2>
+		<h2>National Store Stock Levels{% if stock_date %} as at {{ stock_date|date:"N j, Y" }}{% endif %}</h2>
 		{% for stock_item in stock %}
     <div class="qt-module">
       <div class="qt-header">{{ stock_item.commodity }}</div>
@@ -51,7 +51,7 @@
 {% for region in regions %} 
 <div class="split qt">
   <div class="qt-module-wrapper">
-		<h2>{{ region.name }} Store Stock Levels</h2>
+		<h2>{{ region.name }} Store Stock Levels{% if region.latest %} as at {{ region.latest|date:"N j, Y" }}{% endif %}</h2>
 		{% for commodity in region.commodities %}
     <div class="qt-module">
       <div class="qt-header">{{ commodity_names|key_value:commodity }}</div>

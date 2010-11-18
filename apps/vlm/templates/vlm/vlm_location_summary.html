@@ -50,7 +50,7 @@
     <div class="module progress"> 
     <h2>{% if state_id %}LGAs{% else %}States{% endif %} Stock Summary</h2> 
       <div class="help"> 
-        <p>LGAs Vaccine Stock Summary shows a summation of the stock of vaccines contains in all the wards and health facilities in an LGA</p> 
+        <p>{% if state_id %}LGAs{% else %}States{% endif %} Vaccine Stock Summary shows a summation of the stock of vaccines contains in all the wards and health facilities in {% if state_id %}an LGA{% else %}a State{% endif %}</p> 
       </div>
       <div class="scroller"> 
         <table class="export">

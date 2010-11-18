@@ -1,13 +1,9 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-from django.contrib.auth.decorators import permission_required
-from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseServerError, Http404
-from django.template import RequestContext
-from django.views.decorators.cache import cache_page
 from models import *
 from rapidsms.webui.utils import render_to_response
-from datetime import datetime, timedelta
+from datetime import datetime
 from django.db.models import Max
 # The import here newly added for serializations
 
@@ -31,6 +27,10 @@ def dashboard(req):
 
     location_stock_balance = []
     location_stock = Stock.objects.filter(facility__code=location, time__gte=start_period, time__lt=end_period).annotate(time=Max('time'))
+    if location_stock:
+        stock_date = location_stock[0].time
+    else:
+        stock_date = None
     location_stock.query.group_by=['commodity']
         
     for stock in location_stock:
@@ -46,13 +46,18 @@ def dashboard(req):
     for sub_location in sub_locations:
         sub_location_commodities = commodities_dict.copy()
         sub_location_stock = Stock.objects.filter(facility__location=sub_location, time__gte=start_period, time__lt=end_period).annotate(time=Max('time'))
+        if sub_location_stock:
+            sub_location_stock_date = sub_location_stock[0].time
+        else:
+            sub_location_stock_date = None
         sub_location_stock.query.group_by = ['commodity']
         sub_location_commodities.update(dict(sub_location_stock.values_list('commodity', 'balance')))
-        stock_balances.append({'name':sub_location.name, 'commodities': sub_location_commodities})
+        stock_balances.append({'name':sub_location.name, 'latest': sub_location_stock_date, 'commodities': sub_location_commodities})
         
     return render_to_response(req, "vlm/vlm_dashboard.html", {
         'stock': location_stock_balance, 'commodities': commodities, 
         'regions': stock_balances, 'commodity_names': all_commodities,
+        'stock_date': stock_date,
     })
 
 def location_summary(req, zone="", state="", year=0, month=0):
