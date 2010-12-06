@@ -8,6 +8,17 @@ from reporters.models import PersistantConnection, Reporter, Role
 from locations.models import Location
 from rapidsms.message import StatusCodes
 
+class FormValidationError(Exception):
+    error_msgs = {
+        'invalid_location': "Sorry, I don't know any location with the code: %s",
+        'invalid_role': "Unknown role code: %s",
+        'unauthorized_reporter': 'Please register your number with RapidSMS before sending this report',
+        'unauthorized_role': 'Your role does not have permissions to send this report.',
+        }
+
+    def __init__(self, error_key, error_values=[]):
+        self.msg = self.error_msgs[error_key] % tuple(error_values)
+
 class App(rapidsms.app.App):
 
     kw = Keyworder()
@@ -80,8 +91,9 @@ class App(rapidsms.app.App):
     @kw('report (slug) (numbers) (numbers) (numbers) (numbers)')
     def report(self, message, location_code, girls_l5, girls_g5, boys_l5, boys_g5):
         try:
-            if not hasattr(message, 'reporter'):
+            if not hasattr(message, 'reporter') or not message.reporter:
                 raise FormValidationError('unauthorized_reporter')
+
             if not message.reporter.role.code.lower() in ['br']:
                 raise FormValidationError('unauthorized_role')
 

@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+{% block title %}Birth Registration Dashboard{% endblock %}
+{% block javascripts %}
+<script type="text/javascript" src="/static/webapp/javascripts/highcharts.js"></script>
+<!--[if IE]>
+<script type="text/javascript" src="/static/webapp/javascripts/excanvas.compiled.js"></script>
+<![endif]-->
+{% endblock %}
+{% load cache %}
+{% load humanize %}
+{% load campaign-tags %}
+{% load campaign-filters %}
+
+{% block content %}
+{# cache content of dashboard for one hour #}
+{% cache 0 br_dashboard %}
+<style>
+  .qt { margin-bottom: 2em; }
+  .qt-module-wrapper { margin: auto; width:720px; }
+  .qt-module { width: 180px; float:left }
+  .qt-header { text-align: center; padding: 1em; font-size: 1em; background-color: #fffea7; font-weight: bold; }
+  .qt-body { text-align: center; padding: 0.5em; font-size: 2em; background-color: #ffffbe; }
+  .module h2 { font-size: 1.2em; }
+  .module th + th { text-align: right }
+</style>
+<div class="tmp">
+
+<div class="split" style="margin-bottom: 2em;">
+  {% campaigns "/br/" campaign_id state_id %}
+</div>
+
+<div class="split qt">
+  <div class="qt-module-wrapper">
+    <div class="qt-module">
+      <div class="qt-header">Boys Under 5</div>
+      <div class="qt-body">{{ boys_under5|intcomma }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Boys Over 5</div>
+      <div class="qt-body">{{ boys_over5|intcomma }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Girls Under 5</div>
+      <div class="qt-body">{{ girls_under5|intcomma }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Girls Over 5</div>
+      <div class="qt-body">{{ girls_over5|intcomma }}</div>
+    </div>
+  </div>
+  <div class="clear-hack"></div>
+</div>
+<div class="split"> 
+	<div> 
+    <div class="module progress"> 
+    <h2>LGAs Birth Registration Summary</h2> 
+      <div class="help"> 
+        <p>LGAs Birth Registration Summary shows a summary of the births registered of boys and girls over and under 5 years of age reported in the different LGAs and Wards.</p> 
+      </div>
+      <div class="scroller"> 
+        <table class="export">
+        {% if birthregistration_data %}
+          {% for lga in birthregistration_data %}
+            <thead> 
+              <tr class="caption"> 
+                <td colspan="5"> 
+                  <h3>{{ lga.name }}</h3> 
+                </td> 
+              </tr>
+              <tr> 
+                <th>Ward Name</th> 
+                <th class="min num">Boys Under 5</th>
+                <th class="min num">Boys Over 5</th>
+                <th class="min num">Girls Under 5</th>
+                <th class="min num">Girls Over 5</th>
+              </tr> 
+            </thead>
+            <tbody> 
+              {% for ward in lga.data %}
+              <tr class=warning> 
+                <td>{{ ward.name }}</td> 
+                <td class="min num">{{ ward.boys_under5|default:"-" }}</td>
+                <td class="min num">{{ ward.boys_over5|default:"-" }}</td>
+                <td class="min num">{{ ward.girls_under5|default:"-" }}</td>
+                <td class="min num">{{ ward.girls_over5|default:"-" }}</td>
+              </tr>
+              {% endfor %}
+              <tr class="totals"> 
+                <td>Total for LGA</td> 
+                <td class="min num">{{ lga.boys_under5|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.boys_over5|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.girls_under5|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.girls_over5|default:"-"|intcomma }}</td>
+              </tr> 
+              <tr class="summary"> 
+                <td colspan="5"> 
+                  {{ lga.reporters|default:"0" }} supervisor{{ lga.reporters|pluralize }} in {{ lga.data|length }} ward{{ lga.data|length|pluralize }}
+                </td> 
+              </tr> 
+            </tbody>
+          {% endfor %}
+        {% else %}
+          <tbody><tr class="summary"><td>No data available</td></tr></tbody>
+        {% endif %}
+        </table> 
+      </div> 
+    </div> 
+	</div>
+	<div class="clear-hack"></div> 
+</div>
+
+<div style="display:none">
+</div>
+{% endcache %}
+{% endblock %}
