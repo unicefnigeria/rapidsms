@@ -41,7 +41,10 @@ class Location(models.Model):
     level = models.PositiveIntegerField(blank=True, default=0, db_index=True)
 
     def __unicode__(self):
-        return self.name
+        if hasattr(self, 'type') and self.type:
+            return "%s %s" % (self.name, self.type.name)
+        else:
+            return self.name
     
     class Meta:
         ordering = ['name']
