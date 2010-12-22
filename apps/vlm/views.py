@@ -23,7 +23,10 @@ def dashboard(req):
     location = 'ns'
 
     start_period = datetime(year=2010, month=1, day=1) # Start from January 1st, 2010
-    end_period = datetime(year=month_year, month=month_month + 1 if month_month < 12 else 11 + 1, day=1)
+    if month_month == 12:
+        end_period = datetime(year=month_year+1, month=1, day=1)
+    else:
+        end_period = datetime(year=month_year, month=month_month + 1, day=1)
 
     location_stock_balance = []
     location_stock = Stock.objects.filter(facility__code=location, time__gte=start_period, time__lt=end_period).annotate(time=Max('time'))
