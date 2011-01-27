@@ -88,8 +88,8 @@ class App(rapidsms.app.App):
         self.handled = True
         return True
 
-    @kw('report (slug) (numbers) (numbers) (numbers) (numbers)')
-    def report(self, message, location_code, girls_l5, girls_g5, boys_l5, boys_g5):
+    @kw('report (numbers) (numbers) (numbers) (numbers)')
+    def report(self, message, girls_l5, girls_g5, boys_l5, boys_g5):
         try:
             if not hasattr(message, 'reporter') or not message.reporter:
                 raise FormValidationError('unauthorized_reporter')
@@ -97,7 +97,7 @@ class App(rapidsms.app.App):
             if not message.reporter.role.code.lower() in ['br']:
                 raise FormValidationError('unauthorized_role')
 
-            location = Location.objects.get(code=location_code)
+            location = message.reporter.location
 
             # store the report
             # TODO: add ability to replace duplicate reports
