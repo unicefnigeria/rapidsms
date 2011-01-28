@@ -7,14 +7,16 @@ class BirthRegistration(models.Model):
     reporter = models.ForeignKey(Reporter, blank=True, null=True, related_name="br_birthregistration")
     connection = models.ForeignKey(PersistantConnection, blank=True, null=True, related_name="br_birthregistration")
     location = models.ForeignKey(Location, related_name='birthregistration_records')
-    girls_under5 = models.IntegerField()
-    girls_over5 = models.IntegerField()
-    boys_under5 = models.IntegerField()
-    boys_over5 = models.IntegerField()
+    girls_below1 = models.IntegerField()
+    girls_1to4 = models.IntegerField()
+    girls_5to9 = models.IntegerField()
+    girls_10to18 = models.IntegerField()
+    boys_below1 = models.IntegerField()
+    boys_1to4 = models.IntegerField()
+    boys_5to9 = models.IntegerField()
+    boys_10to18 = models.IntegerField()
 
     time = models.DateTimeField()
 
     def __unicode__(self):
-        return "%s (GL5: %d GO5: %d BL5: %d BO5: %d)" % (self.location, \
-            self.girls_under5, self.girls_over5, self.boys_under5, \
-            self.boys_over5)
+        return "%s" % (self.pk)
