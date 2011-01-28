@@ -71,7 +71,7 @@ class App(rapidsms.app.App):
             rep = Reporter(**data)
             conn = PersistantConnection.from_message(message)
             if Reporter.exists(rep, conn):
-                message.respond("Hello again %s! You are already registered as a %s at %s %s." % (rep.first_name, rep.role, rep.location, rep.location.type), StatusCodes.OK)
+                message.respond("Hello again %s! You are already registered as a %s at %s." % (rep.first_name, rep.role, rep.location), StatusCodes.OK)
                 self.handled = True
                 return True
 
