@@ -120,7 +120,7 @@ class App(rapidsms.app.App):
             br.save()
 
             # respond adequately
-            message.respond("Thank you %s. BR report rec'd for %s Date=%s Girls below 1=%d, 1-4=%d, 5-9=%d, 10-18=%d, Boys below 1=%d, 1-4=%d, 5-9=%d, 10-18=%d" % (br.reporter.first_name, location.name, message.date.strftime('%d/%m/%Y'), br.girls_below1, br.girls_1to4, br.girls_5to9, br.girls_10to18, br.boys_below1, br.boys_1to4, br.boys_5to9, br.boys_10to18))
+            message.respond("Thank you %s. BR report rec'd for %s Date=%s Girls below 1=%d, 1-4=%d, 5-9=%d, 10-17=%d, Boys below 1=%d, 1-4=%d, 5-9=%d, 10-17=%d" % (br.reporter.first_name, location.name, message.date.strftime('%d/%m/%Y'), br.girls_below1, br.girls_1to4, br.girls_5to9, br.girls_10to18, br.boys_below1, br.boys_1to4, br.boys_5to9, br.boys_10to18))
         except FormValidationError, f:
             message.respond(f.msg)
         except Exception, e:
