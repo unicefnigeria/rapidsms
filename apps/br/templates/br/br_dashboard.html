@@ -1,19 +1,9 @@
 {% extends "layout.html" %}
 {% block title %}Birth Registration Dashboard{% endblock %}
-{% block javascripts %}
-<script type="text/javascript" src="/static/webapp/javascripts/highcharts.js"></script>
-<!--[if IE]>
-<script type="text/javascript" src="/static/webapp/javascripts/excanvas.compiled.js"></script>
-<![endif]-->
-{% endblock %}
-{% load cache %}
 {% load humanize %}
-{% load campaign-tags %}
+{% load br-tags %}
 {% load campaign-filters %}
-
 {% block content %}
-{# cache content of dashboard for one hour #}
-{% cache 0 br_dashboard %}
 <style>
   .qt { margin-bottom: 2em; }
   .qt-module-wrapper { margin: auto; width:720px; }
@@ -25,31 +15,55 @@
 </style>
 <div class="tmp">
 
-<div class="split" style="margin-bottom: 2em;">
-  {% campaigns "/br/" campaign_id state_id %}
-</div>
+<p class="split" style="display:inline;float:left">
+  <strong>{{ state.name }} State Birth Registration Data</strong>
+</p>
+
+<p class="split" style="display:inline;float:right">
+	{% states '/br' state.code %} {% months '/br' state.code month_year month_month %}
+</p>
+
+<div class="clear-hack"></div>
 
 <div class="split qt">
   <div class="qt-module-wrapper">
     <div class="qt-module">
-      <div class="qt-header">Boys Under 5</div>
-      <div class="qt-body">{{ boys_under5|intcomma }}</div>
+      <div class="qt-header">Boys below 1</div>
+      <div class="qt-body">{{ boys_below1|intcomma }}</div>
     </div>
     <div class="qt-module">
-      <div class="qt-header">Boys Over 5</div>
-      <div class="qt-body">{{ boys_over5|intcomma }}</div>
+      <div class="qt-header">Boys 1 thru 4</div>
+      <div class="qt-body">{{ boys_1to4|intcomma }}</div>
     </div>
     <div class="qt-module">
-      <div class="qt-header">Girls Under 5</div>
-      <div class="qt-body">{{ girls_under5|intcomma }}</div>
+      <div class="qt-header">Boys 5 thru 9</div>
+      <div class="qt-body">{{ boys_5to9|intcomma }}</div>
     </div>
     <div class="qt-module">
-      <div class="qt-header">Girls Over 5</div>
-      <div class="qt-body">{{ girls_over5|intcomma }}</div>
+      <div class="qt-header">Boys 10 thru 17</div>
+      <div class="qt-body">{{ boys_10to18|intcomma }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Girls below 1</div>
+      <div class="qt-body">{{ girls_below1|intcomma }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Girls 1 thru 4</div>
+      <div class="qt-body">{{ girls_1to4|intcomma }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Girls 5 thru 9</div>
+      <div class="qt-body">{{ girls_5to9|intcomma }}</div>
+    </div>
+    <div class="qt-module">
+      <div class="qt-header">Girls 10 thru 17</div>
+      <div class="qt-body">{{ girls_10to18|intcomma }}</div>
     </div>
   </div>
   <div class="clear-hack"></div>
 </div>
+
+{% if birthregistration_data %}
 <div class="split"> 
 	<div> 
     <div class="module progress"> 
@@ -63,38 +77,50 @@
           {% for lga in birthregistration_data %}
             <thead> 
               <tr class="caption"> 
-                <td colspan="5"> 
+                <td colspan="9"> 
                   <h3>{{ lga.name }}</h3> 
                 </td> 
               </tr>
               <tr> 
-                <th>Ward Name</th> 
-                <th class="min num">Boys Under 5</th>
-                <th class="min num">Boys Over 5</th>
-                <th class="min num">Girls Under 5</th>
-                <th class="min num">Girls Over 5</th>
+                <th>Registration Center</th> 
+                <th class="min num">Boys &lt; 1</th>
+                <th class="min num">Boys 1 - 4</th>
+                <th class="min num">Boys 5 - 9</th>
+                <th class="min num">Boys 10 - 17</th>
+                <th class="min num">Girls &lt; 1</th>
+                <th class="min num">Girls 1 - 4</th>
+                <th class="min num">Girls 5 - 9</th>
+                <th class="min num">Girls 10 - 17</th>
               </tr> 
             </thead>
             <tbody> 
-              {% for ward in lga.data %}
+              {% for rc in lga.data %}
               <tr class=warning> 
-                <td>{{ ward.name }}</td> 
-                <td class="min num">{{ ward.boys_under5|default:"-" }}</td>
-                <td class="min num">{{ ward.boys_over5|default:"-" }}</td>
-                <td class="min num">{{ ward.girls_under5|default:"-" }}</td>
-                <td class="min num">{{ ward.girls_over5|default:"-" }}</td>
+                <td>{{ rc.name }}</td> 
+                <td class="min num">{{ rc.boys_below1|default:"-" }}</td>
+                <td class="min num">{{ rc.boys_1to4|default:"-" }}</td>
+                <td class="min num">{{ rc.boys_5to9|default:"-" }}</td>
+                <td class="min num">{{ rc.boys_10to18|default:"-" }}</td>
+                <td class="min num">{{ rc.girls_below1|default:"-" }}</td>
+                <td class="min num">{{ rc.girls_1to4|default:"-" }}</td>
+                <td class="min num">{{ rc.girls_5to9|default:"-" }}</td>
+                <td class="min num">{{ rc.girls_10to18|default:"-" }}</td>
               </tr>
               {% endfor %}
               <tr class="totals"> 
                 <td>Total for LGA</td> 
-                <td class="min num">{{ lga.boys_under5|default:"-"|intcomma }}</td>
-                <td class="min num">{{ lga.boys_over5|default:"-"|intcomma }}</td>
-                <td class="min num">{{ lga.girls_under5|default:"-"|intcomma }}</td>
-                <td class="min num">{{ lga.girls_over5|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.boys_below1|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.boys_1to4|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.boys_5to9|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.boys_10to18|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.girls_below1|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.girls_1to4|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.girls_5to9|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.girls_10to18|default:"-"|intcomma }}</td>
               </tr> 
               <tr class="summary"> 
-                <td colspan="5"> 
-                  {{ lga.reporters|default:"0" }} supervisor{{ lga.reporters|pluralize }} in {{ lga.data|length }} ward{{ lga.data|length|pluralize }}
+                <td colspan="9"> 
+                  {{ lga.reporters|default:"0" }} supervisor{{ lga.reporters|pluralize }} in {{ lga.data|length }} Registration Center{{ lga.data|length|pluralize }}
                 </td> 
               </tr> 
             </tbody>
@@ -108,8 +134,7 @@
 	</div>
 	<div class="clear-hack"></div> 
 </div>
+{% endif %}
 
-<div style="display:none">
-</div>
-{% endcache %}
+<div style="display:none"></div>
 {% endblock %}

@@ -4,8 +4,9 @@
 from django.views.decorators.cache import cache_page
 from reporters.models import Location, Reporter
 from models import BirthRegistration
-from campaigns.models import Campaign
+from django.db.models import Max
 from rapidsms.webui.utils import render_to_response
+from datetime import datetime
 # The import here newly added for serializations
 
 import sys
@@ -17,68 +18,88 @@ sys.setdefaultencoding('utf-8')
 
 #Views for handling summary of Reports Displayed as Location Tree
 @cache_page(60 * 15)
-def dashboard(req, campaign_id=None, stateid=None):
-    campaign = None
-    all_locations = []
+def dashboard(req, state="", year=0, month=0):
+    month_year = datetime.now().year if not year else int(year)
+    month_month = datetime.now().month if not month else int(month)
+    state = state if state else "19"
+
+    start_period = datetime(year=2010, month=1, day=1)
+    end_period = datetime(year=month_year, month=month_month + 1 if month_month < 12 else 12, day=1)
+    location_state = Location.objects.get(code=state)
+
     birthregistrations = None
     birthregistration_data = []
-    boys_under5 = 0
-    boys_over5 = 0
-    girls_under5 = 0
-    girls_over5 = 0
+    boys_below1 = 0
+    boys_1to4 = 0
+    boys_5to9 = 0
+    boys_10to18 = 0
+    girls_below1 = 0
+    girls_1to4 = 0
+    girls_5to9 = 0
+    girls_10to18 = 0
     
-    if campaign_id:
-        campaign = Campaign.objects.get(id=campaign_id)
-    if campaign:
-        if not stateid:
-            stateid = campaign.campaign_states()[0]
-        state = Location.objects.get(pk=stateid)
-        all_locations.append(state)
-        for lga in campaign.campaign_lgas(state):
-            all_locations.append(lga)
-            for desc in lga.get_descendants():
-                all_locations.append(desc)
-        birthregistrations = campaign.cro(BirthRegistration, state, all_locations)
-        boys_under5 = sum(birthregistrations.values_list('boys_under5', flat=True))
-        boys_over5 = sum(birthregistrations.values_list('boys_over5', flat=True))
-        girls_under5 = sum(birthregistrations.values_list('girls_under5', flat=True))
-        girls_over5 = sum(birthregistrations.values_list('girls_over5', flat=True))
+    rcs = Location.objects.filter(parent__parent=location_state,type__name="Registration Center")
 
-        for lga in campaign.campaign_lgas(state):
-            L = {'name': lga.name, 'girls_under5':0, 'girls_over5':0, 'boys_under5':0, 'boys_over5':0, 'data': []}
+    birthregistrations = BirthRegistration.objects.filter(location__in=rcs, time__gte=start_period, time__lt=end_period).annotate(time=Max('time'))
 
-            for ward in lga.get_children():
-                ward_data = {'name': ward.name, 'girls_under5':0, 'girls_over5':0, 'boys_under5':0, 'boys_over5':0}
+    boys_below1 = sum(birthregistrations.values_list('boys_below1', flat=True))
+    boys_1to4 = sum(birthregistrations.values_list('boys_1to4', flat=True))
+    boys_5to9 = sum(birthregistrations.values_list('boys_5to9', flat=True))
+    boys_10to18 = sum(birthregistrations.values_list('boys_10to18', flat=True))
+    girls_below1 = sum(birthregistrations.values_list('girls_below1', flat=True))
+    girls_1to4 = sum(birthregistrations.values_list('girls_1to4', flat=True))
+    girls_5to9 = sum(birthregistrations.values_list('girls_5to9', flat=True))
+    girls_10to18 = sum(birthregistrations.values_list('girls_10to18', flat=True))
 
-                ward_reports = birthregistrations.filter(location__code__startswith=ward.code,time__range=(campaign.start_date, campaign.end_date)).values('boys_under5','boys_over5', 'girls_under5', 'girls_over5')
+    lgas = list(set([ rc.parent for rc in rcs ]))
 
-                for ward_report in ward_reports:
-                    ward_data['girls_under5'] += ward_report['girls_under5'] 
-                    ward_data['girls_over5'] += ward_report['girls_over5']
-                    ward_data['boys_under5'] += ward_report['boys_under5'] 
-                    ward_data['boys_over5'] += ward_report['boys_over5'] 
+    for lga in lgas:
+        L = {'name': lga.name, 'boys_below1':0, 'boys_1to4':0, 'boys_5to9':0, 'boys_10to18':0, 'girls_below1':0, 'girls_1to4':0, 'girls_5to9':0, 'girls_10to18':0, 'data': []}
+        rcs = Location.objects.filter(parent=lga,type__name="Registration Center")
 
-                    L['girls_under5'] += ward_report['girls_under5'] 
-                    L['girls_over5'] += ward_report['girls_over5']
-                    L['boys_under5'] += ward_report['boys_under5'] 
-                    L['boys_over5'] += ward_report['boys_over5'] 
-                
-                L['data'].append(ward_data)
-            L['reporters'] = Reporter.objects.filter(location__code__startswith=lga.code).count()
+        for rc in rcs:
+            rc_data = {'name': rc.name, 'girls_below1':0, 'girls_1to4':0, 'girls_5to9':0, 'girls_10to18':0, 'boys_below1':0, 'boys_1to4':0, 'boys_5to9':0, 'boys_10to18':0}
 
-            birthregistration_data.append(L)
+            rc_reports = birthregistrations.filter(location__code__startswith=rc.code,time__range=(start_period, end_period)).values('girls_below1', 'girls_1to4', 'girls_5to9', 'girls_10to18', 'boys_below1', 'boys_1to4', 'boys_5to9', 'boys_10to18')
 
-    else:
-        pass
+            for rc_report in rc_reports:
+                rc_data['boys_below1'] += rc_report['boys_below1'] 
+                rc_data['boys_1to4'] += rc_report['boys_1to4'] 
+                rc_data['boys_5to9'] += rc_report['boys_5to9'] 
+                rc_data['boys_10to18'] += rc_report['boys_10to18'] 
+                rc_data['girls_below1'] += rc_report['girls_below1'] 
+                rc_data['girls_1to4'] += rc_report['girls_1to4'] 
+                rc_data['girls_5to9'] += rc_report['girls_5to9'] 
+                rc_data['girls_10to18'] += rc_report['girls_10to18'] 
+
+                L['girls_below1'] += rc_report['girls_below1'] 
+                L['girls_1to4'] += rc_report['girls_1to4'] 
+                L['girls_5to9'] += rc_report['girls_5to9'] 
+                L['girls_10to18'] += rc_report['girls_10to18'] 
+                L['boys_below1'] += rc_report['boys_below1'] 
+                L['boys_1to4'] += rc_report['boys_1to4'] 
+                L['boys_5to9'] += rc_report['boys_5to9'] 
+                L['boys_10to18'] += rc_report['boys_10to18'] 
+            
+            L['data'].append(rc_data)
+        L['reporters'] = Reporter.objects.filter(location__code__startswith=lga.code, role__code='BR').count()
+
+        birthregistration_data.append(L)
 
     return render_to_response(req, "br/br_dashboard.html", 
         {
         'birthregistration_data': birthregistration_data,
-        'boys_under5': boys_under5,
-        'boys_over5': boys_over5,
-        'girls_under5': girls_under5,
-        'girls_over5': girls_over5,
-        'campaign_id': campaign_id,
-        'state_id': stateid,
+        'boys_below1': boys_below1,
+        'boys_1to4': boys_1to4,
+        'boys_5to9': boys_5to9,
+        'boys_10to18': boys_10to18,
+        'girls_below1': girls_below1,
+        'girls_1to4': girls_1to4,
+        'girls_5to9': girls_5to9,
+        'girls_10to18': girls_10to18,
+        'state': location_state,
+        'month_month': month_month,
+        'month_year': month_year,
+
         })
 

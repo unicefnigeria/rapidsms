@@ -5,5 +5,5 @@ from django.conf.urls.defaults import *
 import br.views as views
 
 urlpatterns = patterns('',
-    url(r'^br/?(?P<campaign_id>\d*)/?(?P<stateid>\d*)/?$', views.dashboard),
+    url(r'^br/?(?P<state>\d*)/?(?P<year>\d*)/?(?P<month>\d*)/?$', views.dashboard),
 )
