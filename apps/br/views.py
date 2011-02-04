@@ -38,7 +38,7 @@ def dashboard(req, state="", year=0, month=0):
     girls_5to9 = 0
     girls_10to18 = 0
     
-    rcs = Location.objects.filter(parent__parent=location_state,type__name="Registration Center")
+    rcs = Location.objects.filter(parent__parent=location_state,type__name="RC")
 
     birthregistrations = BirthRegistration.objects.filter(location__in=rcs, time__gte=start_period, time__lt=end_period).annotate(time=Max('time'))
 
@@ -55,7 +55,7 @@ def dashboard(req, state="", year=0, month=0):
 
     for lga in lgas:
         L = {'name': lga.name, 'boys_below1':0, 'boys_1to4':0, 'boys_5to9':0, 'boys_10to18':0, 'girls_below1':0, 'girls_1to4':0, 'girls_5to9':0, 'girls_10to18':0, 'data': []}
-        rcs = Location.objects.filter(parent=lga,type__name="Registration Center")
+        rcs = Location.objects.filter(parent=lga,type__name="RC")
 
         for rc in rcs:
             rc_data = {'name': rc.name, 'girls_below1':0, 'girls_1to4':0, 'girls_5to9':0, 'girls_10to18':0, 'boys_below1':0, 'boys_1to4':0, 'boys_5to9':0, 'boys_10to18':0}
