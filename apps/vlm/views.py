@@ -7,6 +7,7 @@ from datetime import datetime
 from django.db.models import Max
 # The import here newly added for serializations
 
+
 def _compare(x, y):
     if x['commodity_code'] == y['commodity_code']:
         return 0
