@@ -38,7 +38,7 @@ def months(baseurl, zone_id="", state_id="", year=0, month=0):
     for yr in range(end_year, start_year, -1):
         for mth in range(12, 0, -1):
             months.append({'name': "%s, %d" % (all_months[mth], yr), \
-                'year': year, 'month': mth,
+                'year': yr, 'month': mth,
                 'selected': 1 if (int(month) == mth and int(year) == yr) else 0 })
     return { "months": months, "month_baseurl": baseurl, 'month_state_id': state_id, "month_zone_id": zone_id }
 
