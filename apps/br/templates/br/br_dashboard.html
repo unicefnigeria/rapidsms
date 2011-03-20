@@ -77,7 +77,7 @@
           {% for lga in birthregistration_data %}
             <thead> 
               <tr class="caption"> 
-                <td colspan="9"> 
+                <td colspan="11"> 
                   <h3>{{ lga.name }}</h3> 
                 </td> 
               </tr>
@@ -87,10 +87,12 @@
                 <th class="min num">Boys 1 - 4</th>
                 <th class="min num">Boys 5 - 9</th>
                 <th class="min num">Boys 10 - 17</th>
+				<th class="min num"><strong>Total</strong></th>
                 <th class="min num">Girls &lt; 1</th>
                 <th class="min num">Girls 1 - 4</th>
                 <th class="min num">Girls 5 - 9</th>
                 <th class="min num">Girls 10 - 17</th>
+                <th class="min num"><strong>Total</strong></th>
               </tr> 
             </thead>
             <tbody> 
@@ -101,10 +103,12 @@
                 <td class="min num">{{ rc.boys_1to4|default:"-" }}</td>
                 <td class="min num">{{ rc.boys_5to9|default:"-" }}</td>
                 <td class="min num">{{ rc.boys_10to18|default:"-" }}</td>
+                <td class="min num"><strong>{{ rc.total_boys|default:"-" }}</strong></td>
                 <td class="min num">{{ rc.girls_below1|default:"-" }}</td>
                 <td class="min num">{{ rc.girls_1to4|default:"-" }}</td>
                 <td class="min num">{{ rc.girls_5to9|default:"-" }}</td>
                 <td class="min num">{{ rc.girls_10to18|default:"-" }}</td>
+                <td class="min num"><strong>{{ rc.total_girls|default:"-" }}</strong></td>
               </tr>
               {% endfor %}
               <tr class="totals"> 
@@ -113,13 +117,15 @@
                 <td class="min num">{{ lga.boys_1to4|default:"-"|intcomma }}</td>
                 <td class="min num">{{ lga.boys_5to9|default:"-"|intcomma }}</td>
                 <td class="min num">{{ lga.boys_10to18|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.total_boys|default:"-"|intcomma }}</td>
                 <td class="min num">{{ lga.girls_below1|default:"-"|intcomma }}</td>
                 <td class="min num">{{ lga.girls_1to4|default:"-"|intcomma }}</td>
                 <td class="min num">{{ lga.girls_5to9|default:"-"|intcomma }}</td>
                 <td class="min num">{{ lga.girls_10to18|default:"-"|intcomma }}</td>
+                <td class="min num">{{ lga.total_girls|default:"-"|intcomma }}</td>
               </tr> 
               <tr class="summary"> 
-                <td colspan="9"> 
+                <td colspan="11"> 
                   {{ lga.reporters|default:"0" }} supervisor{{ lga.reporters|pluralize }} in {{ lga.data|length }} Registration Center{{ lga.data|length|pluralize }}
                 </td> 
               </tr> 

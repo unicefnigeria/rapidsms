@@ -54,11 +54,11 @@ def dashboard(req, state="", year=0, month=0):
     lgas = list(set([ rc.parent for rc in rcs ]))
 
     for lga in lgas:
-        L = {'name': lga.name, 'boys_below1':0, 'boys_1to4':0, 'boys_5to9':0, 'boys_10to18':0, 'girls_below1':0, 'girls_1to4':0, 'girls_5to9':0, 'girls_10to18':0, 'data': []}
+        L = {'name': lga.name, 'boys_below1':0, 'boys_1to4':0, 'boys_5to9':0, 'boys_10to18':0, 'total_boys': 0, 'girls_below1':0, 'girls_1to4':0, 'girls_5to9':0, 'girls_10to18':0, 'total_girls':0, 'data': []}
         rcs = Location.objects.filter(parent=lga,type__name="RC")
 
         for rc in rcs:
-            rc_data = {'name': rc.name, 'girls_below1':0, 'girls_1to4':0, 'girls_5to9':0, 'girls_10to18':0, 'boys_below1':0, 'boys_1to4':0, 'boys_5to9':0, 'boys_10to18':0}
+            rc_data = {'name': rc.name, 'girls_below1':0, 'girls_1to4':0, 'girls_5to9':0, 'girls_10to18':0, 'total_girls':0, 'boys_below1':0, 'boys_1to4':0, 'boys_5to9':0, 'boys_10to18':0, 'total_boys':0}
 
             rc_reports = birthregistrations.filter(location__code__startswith=rc.code,time__range=(start_period, end_period)).values('girls_below1', 'girls_1to4', 'girls_5to9', 'girls_10to18', 'boys_below1', 'boys_1to4', 'boys_5to9', 'boys_10to18')
 
@@ -81,9 +81,15 @@ def dashboard(req, state="", year=0, month=0):
                 L['boys_5to9'] += rc_report['boys_5to9'] 
                 L['boys_10to18'] += rc_report['boys_10to18'] 
             
+            rc_data['total_girls'] = rc_data['girls_below1'] + rc_data['girls_1to4'] + rc_data['girls_5to9'] + rc_data['girls_10to18']
+            rc_data['total_boys'] = rc_data['boys_below1'] + rc_data['boys_1to4'] + rc_data['boys_5to9'] + rc_data['boys_10to18']
+            
             L['data'].append(rc_data)
+            
         L['reporters'] = Reporter.objects.filter(location__code__startswith=lga.code, role__code='BR').count()
-
+        L['total_girls'] = L['girls_below1'] + L['girls_1to4'] + L['girls_5to9'] + L['girls_10to18']
+        L['total_boys'] = L['boys_below1'] + L['boys_1to4'] + L['boys_5to9'] + L['boys_10to18']
+        
         birthregistration_data.append(L)
 
     return render_to_response(req, "br/br_dashboard.html", 
