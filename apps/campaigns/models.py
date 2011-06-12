@@ -29,7 +29,7 @@ class Campaign(models.Model):
     def campaign_lgas(self, state):
         try:
             if self.locations.get(id=state.id) and state.type == LocationType.objects.get(name="State"):
-                return self.locations.filter(parent=state) or state.get_children()
+                return self.locations.filter(parent=state,type__name="LGA") or state.get_children()
         except (Location.DoesNotExist):
             pass
 

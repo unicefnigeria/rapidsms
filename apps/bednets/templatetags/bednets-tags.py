@@ -179,7 +179,7 @@ def distribution_summary(campaign_id, state_id):
     # called to fetch and assemble the
     # data structure for each pilot LGA
     def __lga_data(lga):
-        wards = lga.children.all()
+        wards = lga.children.filter(type__name="Ward")
         reporters = Reporter.objects.filter(location__in=wards)
         supervisors = reporters.filter(role__code__iexact="WS").count()
         summary = "%d supervisors in %d wards" % (supervisors, len(wards))
