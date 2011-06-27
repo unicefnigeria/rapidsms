@@ -157,7 +157,7 @@ def pilot_summary():
             }
         }
 
-        wards = lga.children.all()
+        wards = lga.children.filter(type__name="Ward")
         
         ward_data = map(__ward_data, wards)
         def __wards_total(key):

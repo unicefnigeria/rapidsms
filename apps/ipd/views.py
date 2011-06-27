@@ -56,7 +56,7 @@ def dashboard(req, campaign_id=None, stateid=None):
         all_locations.append(state)
         for lga in campaign.campaign_lgas(state):
             all_locations.append(lga)
-            for desc in lga.get_descendants():
+            for desc in lga.children.filter(type__name="Ward"):
                 all_locations.append(desc)
         vaccinations = campaign.cro(Report, state, all_locations)
         cases = campaign.cro(NonCompliance, state, all_locations)
@@ -91,7 +91,7 @@ def dashboard(req, campaign_id=None, stateid=None):
             lga_totals = {}
             lga_totals_nc = {}
             
-            for ward in lga.get_children():
+            for ward in lga.children.filter(type__name="Ward"):
                 ward_data_im = {}
                 ward_data_nc = {}
                 ward_data_im['name'] = ward.name
