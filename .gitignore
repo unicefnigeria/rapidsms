@@ -14,3 +14,4 @@ apps/nigeria/fixtures/message_counter.json
 *~
 \#*
 *.log*
+.DS_Store
