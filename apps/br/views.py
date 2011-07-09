@@ -94,6 +94,7 @@ def dashboard(req, state="", year=0, month=0):
 
     return render_to_response(req, "br/br_dashboard.html", 
         {
+        'prefix': '/br',
         'birthregistration_data': birthregistration_data,
         'boys_below1': boys_below1,
         'boys_1to4': boys_1to4,
@@ -106,6 +107,97 @@ def dashboard(req, state="", year=0, month=0):
         'state': location_state,
         'month_month': month_month,
         'month_year': month_year,
-
         })
 
+#Views for handling summary of Reports Displayed as Location Tree
+@cache_page(60 * 15)
+def monthly_dashboard(req, state="", year=0, month=0):
+    month_year = datetime.now().year if not year else int(year)
+    month_month = datetime.now().month if not month else int(month)
+    state = state if state else "19"
+
+    start_period = datetime(year=month_year, month=month_month, day=1)
+    end_period = datetime(year=month_year, month=month_month + 1 if month_month < 12 else 12, day=1)
+    location_state = Location.objects.get(code=state)
+
+    birthregistrations = None
+    birthregistration_data = []
+    boys_below1 = 0
+    boys_1to4 = 0
+    boys_5to9 = 0
+    boys_10to18 = 0
+    girls_below1 = 0
+    girls_1to4 = 0
+    girls_5to9 = 0
+    girls_10to18 = 0
+
+    rcs = Location.objects.filter(parent__parent=location_state,type__name="RC")
+
+    birthregistrations = BirthRegistration.objects.filter(location__in=rcs, time__gte=start_period, time__lt=end_period).annotate(time=Max('time'))
+
+    boys_below1 = sum(birthregistrations.values_list('boys_below1', flat=True))
+    boys_1to4 = sum(birthregistrations.values_list('boys_1to4', flat=True))
+    boys_5to9 = sum(birthregistrations.values_list('boys_5to9', flat=True))
+    boys_10to18 = sum(birthregistrations.values_list('boys_10to18', flat=True))
+    girls_below1 = sum(birthregistrations.values_list('girls_below1', flat=True))
+    girls_1to4 = sum(birthregistrations.values_list('girls_1to4', flat=True))
+    girls_5to9 = sum(birthregistrations.values_list('girls_5to9', flat=True))
+    girls_10to18 = sum(birthregistrations.values_list('girls_10to18', flat=True))
+
+    lgas = list(set([ rc.parent for rc in rcs ]))
+
+    for lga in lgas:
+        L = {'name': lga.name, 'boys_below1':0, 'boys_1to4':0, 'boys_5to9':0, 'boys_10to18':0, 'total_boys': 0, 'girls_below1':0, 'girls_1to4':0, 'girls_5to9':0, 'girls_10to18':0, 'total_girls':0, 'data': []}
+        rcs = Location.objects.filter(parent=lga,type__name="RC")
+
+        for rc in rcs:
+            rc_data = {'name': rc.name, 'girls_below1':0, 'girls_1to4':0, 'girls_5to9':0, 'girls_10to18':0, 'total_girls':0, 'boys_below1':0, 'boys_1to4':0, 'boys_5to9':0, 'boys_10to18':0, 'total_boys':0}
+
+            rc_reports = birthregistrations.filter(location__code__startswith=rc.code,time__range=(start_period, end_period)).values('girls_below1', 'girls_1to4', 'girls_5to9', 'girls_10to18', 'boys_below1', 'boys_1to4', 'boys_5to9', 'boys_10to18')
+
+            for rc_report in rc_reports:
+                rc_data['boys_below1'] += rc_report['boys_below1'] 
+                rc_data['boys_1to4'] += rc_report['boys_1to4'] 
+                rc_data['boys_5to9'] += rc_report['boys_5to9'] 
+                rc_data['boys_10to18'] += rc_report['boys_10to18'] 
+                rc_data['girls_below1'] += rc_report['girls_below1'] 
+                rc_data['girls_1to4'] += rc_report['girls_1to4'] 
+                rc_data['girls_5to9'] += rc_report['girls_5to9'] 
+                rc_data['girls_10to18'] += rc_report['girls_10to18'] 
+
+                L['girls_below1'] += rc_report['girls_below1'] 
+                L['girls_1to4'] += rc_report['girls_1to4'] 
+                L['girls_5to9'] += rc_report['girls_5to9'] 
+                L['girls_10to18'] += rc_report['girls_10to18'] 
+                L['boys_below1'] += rc_report['boys_below1'] 
+                L['boys_1to4'] += rc_report['boys_1to4'] 
+                L['boys_5to9'] += rc_report['boys_5to9'] 
+                L['boys_10to18'] += rc_report['boys_10to18'] 
+
+            rc_data['total_girls'] = rc_data['girls_below1'] + rc_data['girls_1to4'] + rc_data['girls_5to9'] + rc_data['girls_10to18']
+            rc_data['total_boys'] = rc_data['boys_below1'] + rc_data['boys_1to4'] + rc_data['boys_5to9'] + rc_data['boys_10to18']
+
+            L['data'].append(rc_data)
+
+        L['reporters'] = Reporter.objects.filter(location__code__startswith=lga.code, role__code='BR').count()
+        L['total_girls'] = L['girls_below1'] + L['girls_1to4'] + L['girls_5to9'] + L['girls_10to18']
+        L['total_boys'] = L['boys_below1'] + L['boys_1to4'] + L['boys_5to9'] + L['boys_10to18']
+
+        birthregistration_data.append(L)
+
+    return render_to_response(req, "br/br_dashboard.html", 
+        {
+        'prefix': '/br/monthly',
+        'birthregistration_data': birthregistration_data,
+        'boys_below1': boys_below1,
+        'boys_1to4': boys_1to4,
+        'boys_5to9': boys_5to9,
+        'boys_10to18': boys_10to18,
+        'girls_below1': girls_below1,
+        'girls_1to4': girls_1to4,
+        'girls_5to9': girls_5to9,
+        'girls_10to18': girls_10to18,
+        'state': location_state,
+        'month_month': month_month,
+        'month_year': month_year,
+        })

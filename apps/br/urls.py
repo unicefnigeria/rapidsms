@@ -6,4 +6,5 @@ import br.views as views
 
 urlpatterns = patterns('',
     url(r'^br/?(?P<state>\d*)/?(?P<year>\d*)/?(?P<month>\d*)/?$', views.dashboard),
+    url(r'^br/monthly/?(?P<state>\d*)/?(?P<year>\d*)/?(?P<month>\d*)/?$', views.monthly_dashboard),
 )

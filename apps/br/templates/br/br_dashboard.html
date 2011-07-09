@@ -3,6 +3,13 @@
 {% load humanize %}
 {% load br-tags %}
 {% load campaign-filters %}
+{% block page_tabs %}
+<ul id="page-tabs">
+	<li {% ifequal prefix "/br" %}class="active"{% endifequal %}><a href="/br">Cummulative</a></li>
+	<li {% ifequal prefix "/br/monthly" %}class="active"{% endifequal %}><a href="/br/monthly">Monthly</a></li>
+	<!--<li><a href="/br/monthly">Charts</a></li>-->
+</ul>
+{% endblock %}
 {% block content %}
 <style>
   .qt { margin-bottom: 2em; }
@@ -20,7 +27,12 @@
 </p>
 
 <p class="split" style="display:inline;float:right">
-	{% states '/br' state.code %} {% months '/br' state.code month_year month_month %}
+	{% states prefix state.code %} {% months prefix state.code month_year month_month %}
+	{% if perms.bednets.can_view and campaign_id %}
+	<!--<form action="/br/data/{{ state.code }}/{{ month_year }}/{{ month_month }}" method="post">
+		<button type="submit">Download</button>
+	</form>-->
+	{% endif %}
 </p>
 
 <div class="clear-hack"></div>
