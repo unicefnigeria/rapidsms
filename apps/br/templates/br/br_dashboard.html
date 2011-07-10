@@ -28,10 +28,12 @@
 
 <p class="split" style="display:inline;float:right">
 	{% states prefix state.code %} {% months prefix state.code month_year month_month %}
-	{% if perms.bednets.can_view and campaign_id %}
-	<!--<form action="/br/data/{{ state.code }}/{{ month_year }}/{{ month_month }}" method="post">
-		<button type="submit">Download</button>
-	</form>-->
+	{% if perms.br.can_view %}
+	{% ifequal prefix '/br' %}
+	<button type="button" onclick="location.href='/br/data/{{ state.code }}/{{ month_year }}/{{ month_month }}'">Download CSV</button>
+	{% else %}
+	<button type="button" onclick="location.href='/br/data/monthly/{{ state.code }}/{{ month_year }}/{{ month_month }}'">Download CSV</button>
+	{% endifequal %}
 	{% endif %}
 </p>
 
