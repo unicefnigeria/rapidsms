@@ -20,3 +20,8 @@ class BirthRegistration(models.Model):
 
     def __unicode__(self):
         return "%s" % (self.pk)
+    
+    class Meta:
+        permissions = (
+            ("can_view", "Can view"),
+        )
