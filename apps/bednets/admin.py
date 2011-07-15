@@ -8,12 +8,14 @@ class NetDistributionAdmin(admin.ModelAdmin):
     list_display = ['location', 'distributed', 'expected', 'actual', 'discrepancy',\
         'reporter', 'time']
     date_hierarchy = 'time'
+    search_fields = ['location__name', 'location__code', 'reporter__first_name', 'reporter__last_name']
 
 
 class CardDistributionAdmin(admin.ModelAdmin):
     list_display = ['location', 'settlements', 'people', 'distributed', 'reporter',\
         'time']
     date_hierarchy = 'time'
+    search_fields = ['location__name', 'location__code', 'reporter__first_name', 'reporter__last_name']
 
 
 admin.site.register(NetDistribution, NetDistributionAdmin)
