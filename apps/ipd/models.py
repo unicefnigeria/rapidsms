@@ -23,6 +23,10 @@ class Report(models.Model):
         ('deworm', 'Deworming'),
         ('sp', 'Sulphadoxie Pyrimethanol for IPT'),
         ('plus', 'Plus'),
+        ('hp', 'Health Promotion'),
+        ('fp', 'Family Planning'),
+        ('llin', 'Long Lasting Insecticide Nets'),
+        ('muac', 'Measurement of Upper Arm Circumference'),
     )
 
     reporter = models.ForeignKey(Reporter, null=True, blank=True)
