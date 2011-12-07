@@ -27,6 +27,8 @@ def dashboard(req, prefix="", state="", year=0, month=0):
 
     start_period = datetime(year=month_year, month=month_month, day=1) if prefix == 'monthly' else datetime(year=2010, month=1, day=1)
     end_period = datetime(year=month_year, month=month_month + 1 if month_month < 12 else 12, day=1)
+    if month_month == 12: 
+        end_period = datetime(year=month_year+1, month=1, day=1)
     location_state = Location.objects.get(code=state)
 
     birthregistrations = None
