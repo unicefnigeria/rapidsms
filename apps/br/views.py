@@ -121,6 +121,8 @@ def csv_download(req, prefix="", state="", year=0, month=0):
     # The start period should be the specified month for monthly data or Jan. 2010 for cummulative
     start_period = datetime(year=month_year, month=month_month, day=1) if prefix == 'monthly' else datetime(year=2010, month=1, day=1)
     end_period = datetime(year=month_year, month=month_month + 1 if month_month < 12 else 12, day=1)
+    if month_month == 12: 
+        end_period = datetime(year=month_year+1, month=1, day=1)
     location_state = Location.objects.get(code=state)
     rcs = Location.objects.filter(parent__parent=location_state,type__name="RC")
 
